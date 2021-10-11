@@ -1,0 +1,4 @@
+cmake_minimum_required(VERSION 3.7)
+
+AUX_SOURCE_DIRECTORY(. DIR_TEST1_SRCS)
+ADD_LIBRARY (ChatClientLib ${DIR_TEST1_SRCS})
