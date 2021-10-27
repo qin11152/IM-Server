@@ -1,0 +1,36 @@
+#pragma once
+
+#include "boost/property_tree/ptree.hpp"
+#include "boost/property_tree/json_parser.hpp"
+#include <string>
+#include <type_traits>
+#include <map>
+enum class MessageType
+{
+    Default,
+    RegisterRequest,
+    RegisterResponse,
+    LoginRequest,
+    LoginResponse,
+    GroupChat,
+    SingleChat,
+    AddFriendRequest,
+    AddFriendResponse
+};
+
+using MessageTypeBaseType=std::underlying_type<MessageType>;
+using namespace boost::property_tree;
+//all the json data used in communicate should inherit from this class
+class JsonBaseData
+{
+    public:
+        JsonBaseData()
+        {
+        }
+        MessageType getType()const{return m_strType;}
+        virtual void parse(const std::string& message);
+        virtual std::string generateJson();
+    private:
+        MessageType m_strType{MessageType::Default};
+        std::map<std::string,std::string> m_mapMessageInfo;
+};
