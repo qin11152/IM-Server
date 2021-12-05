@@ -1,5 +1,26 @@
 #include "MysqlQuery.h"
 
+std::mutex MysqlQuery::m_mutex;
+std::shared_ptr<MysqlQuery> MysqlQuery::m_ptrInstance={nullptr};
+
+const char* kIp="127.0.0.1";
+const char* kDataBase="chat_data";
+const char* kUser="root";
+const char* kPassword="qinbiao9704";
+
+std::shared_ptr<MysqlQuery> MysqlQuery::Instance()
+{
+    if (m_ptrInstance == nullptr)
+    {
+        std::lock_guard<std::mutex> lck(m_mutex);
+        if (m_ptrInstance == nullptr)
+        {
+            m_ptrInstance = std::shared_ptr<MysqlQuery>(new MysqlQuery(kIp,kDataBase,kUser,kPassword));
+        }
+    }
+    return m_ptrInstance;
+}
+
 MysqlQuery::MysqlQuery(const char* ip,const char* database,const char* user,const char*password):
     m_destinationIp(ip),
     m_destinationDatabase(database),
