@@ -5,6 +5,9 @@
 #include <string>
 #include <type_traits>
 #include <map>
+
+constexpr int PackageHeadSize=8;
+
 enum class MessageType
 {
     Default,
@@ -15,7 +18,14 @@ enum class MessageType
     GroupChat,
     SingleChat,
     AddFriendRequest,
-    AddFriendResponse
+    AddFriendResponse,
+    HeartPackage
+};
+
+struct LengthInfo
+{
+    int length;
+    LengthInfo(int l):length(l){}
 };
 
 using MessageTypeBaseType=std::underlying_type<MessageType>;
