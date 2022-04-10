@@ -56,20 +56,20 @@ int MysqlQuery::GetCurrentUserCount()
     return tmp;
 }
 
-bool MysqlQuery::InsertNewUser(const std::string name,const std::string&password,
+int MysqlQuery::InsertNewUser(const std::string name,const std::string&password,
                             const std::string iconUrl,const std::string& signature)
 {
     int id=GetCurrentUserCount()+1;
     std::string query="insert into user_info (id,password,name,signature,icon) values("
-    +std::to_string(id)+",\""+name+"\",\""+password+"\",\""+signature+
+    +std::to_string(id)+",\""+password+"\",\""+name+"\",\""+signature+
     "\",\""+iconUrl+"\");";
     //std::cout<<query<<std::endl;
     if(mysql_query(m_mysql,query.c_str()))
     {
         std::cout<<"insert new failed\n";
-        return false;
+        return -1;
     }
-    return true;
+    return id;
 }
 
 bool MysqlQuery::VertifyPassword(int id,const std::string& password)
@@ -113,6 +113,45 @@ bool MysqlQuery::AddFriend(int friend_1,int friend_2)
         return false;
     } 
     return true;
+}
+
+bool MysqlQuery::queryUserIsOnline(std::string userId)
+{
+    bool onlineState={false};
+    std::string query="select online from user_info where id="+userId;
+    printf("%s\n",query.c_str());
+    if(mysql_query(m_mysql,query.c_str()))
+    {
+        printf("query online state failed\n");
+        return false;
+    }
+    MYSQL_RES* res=nullptr;
+    //将查询的结果存储在res中
+    res=mysql_store_result(m_mysql);
+    //获取结果中的行数
+    int rowCount=mysql_num_rows(res);
+    //获取结果中的列数
+    int colCount=mysql_num_fields(res);
+    //存储列
+    MYSQL_FIELD* pField=nullptr;
+    //当还有列的时候就一直获取
+    while(pField=mysql_fetch_field(res))
+    {
+         //可以存储列的名称
+         //操作是pField->name;
+    }
+    //获取行
+    MYSQL_ROW rowPtr=nullptr;
+    //有就一直获取
+    while(rowPtr=mysql_fetch_row(res))
+    {
+        //可以通过循环获取每一行的内容，每一行中
+        //列的名称在上边已经进行了获取
+        //这里只有一行一列
+        onlineState=rowPtr[0];
+    }
+    mysql_free_result(res);
+    return onlineState;
 }
 
 MysqlQuery::~MysqlQuery(){
