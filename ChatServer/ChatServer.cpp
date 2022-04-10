@@ -29,17 +29,16 @@ void ChatServer::removeDisconnetedClient(int id,std::shared_ptr<ChatClient> ptr)
     {
         m_idMap.erase(id);
     }
-    printf("before size is:%d\n",m_socketVec.size());
+    //printf("before size is:%d\n",m_socketVec.size());
     for(auto iter=m_socketVec.begin();iter!=m_socketVec.end();++iter)
     {
         if(*iter==ptr)
         {
-            std::cout<<(*iter).use_count()<<std::endl;
+            //std::cout<<(*iter).use_count()<<std::endl;
             m_socketVec.erase(iter);
             return;
         }
     }
-    printf("after size is:%d\n",m_socketVec.size());
 }
 
 void ChatServer::insertIntoIdMap(int id,std::shared_ptr<ChatClient> m_clientPtr)
@@ -49,5 +48,8 @@ void ChatServer::insertIntoIdMap(int id,std::shared_ptr<ChatClient> m_clientPtr)
 
 bool ChatServer::transferMessage(int id,std::string& message)
 {
-    m_idMap[id]->DoWrite(message,message.length());
+    if(m_idMap.find(id)!=m_idMap.end())
+    {
+        m_idMap[id]->DoWrite(message,message.length());
+    }
 }

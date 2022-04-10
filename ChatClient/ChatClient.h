@@ -12,25 +12,7 @@ using namespace boost::property_tree;
 
 class ChatServer;
 
-//传递的消息类型都在这些枚举类型中
-enum class MESSAGE_TYPE
-{
-    Default,
-    RegisterRequest,
-    RegisterResponse,
-    LoginRequest,
-    LoginResponse,
-    InitialRequest,
-    GroupChat,
-    SingleChat,
-    AddFriendRequest,
-    AddFriendResponse,
-    HeartPackage
-};
-
 constexpr int BUFFERLENGTH=10*1024;
-//消息类型的基本类型
-using message_type_base_type=std::underlying_type<MESSAGE_TYPE>::type;
 
 using namespace boost::asio;
 using namespace boost::asio::ip;
