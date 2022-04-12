@@ -1,0 +1,27 @@
+cmake_minimum_required(VERSION 3.6)
+
+project(qin)
+
+
+aux_source_directory(. DIR_SRCS)
+include_directories("${PROJECT_SOURCE_DIR}/MysqlQuery")
+include_directories("${PROJECT_SOURCE_DIR}/ChatServer")
+include_directories("${PROJECT_SOURCE_DIR}/ChatClient")
+include_directories("${PROJECT_SOURCE_DIR}/protocol")
+
+
+
+add_subdirectory(MysqlQuery)
+add_subdirectory(ChatClient)
+add_subdirectory(ChatServer)
+add_subdirectory(protocol)
+
+add_executable(qin main.cpp)
+
+TARGET_LINK_LIBRARIES(qin MysqlQueryLib)
+TARGET_LINK_LIBRARIES(qin ChatServerLib)
+TARGET_LINK_LIBRARIES(qin ChatClientLib)
+TARGET_LINK_LIBRARIES(qin ProtocolLib)
+target_link_libraries(qin  libmysqlclient.so)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
