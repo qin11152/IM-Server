@@ -11,4 +11,5 @@ public:
     virtual std::string generateJson()override;
 
     bool m_bRegisterResult{false};
+    int m_iId{-1};
 };

@@ -1,2 +1,3 @@
 # TinyWeChat
-chat server based on asio
+linux下开发的基于asio的即时通讯程序，使用mysql数据库和阿里云服务器搭建服务端程序，采用多线程。客户端界面用qt框架绘制
+这里是服务端
