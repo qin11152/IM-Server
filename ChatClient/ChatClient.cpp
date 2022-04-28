@@ -274,6 +274,7 @@ void ChatClient::handleClientMessage(const std::string& message)
     case static_cast<int>(MessageType::GetFriendList):
         {
             std::string userId=pt.get<std::string>("UserId");
+            //TODO查询表获取好友列表
         }
         break;
     default:
