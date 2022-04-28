@@ -46,7 +46,7 @@ void ChatClient::DoWrite(const std::string& message,int length)
     }
     msgLength=msgLength+message;
     int cnt=boost::asio::write(m_clientSocket,boost::asio::buffer(msgLength.c_str(),length+PackageHeadSize));
-    printf("send %d byte\n",cnt);
+    //printf("send %d byte\n",cnt);
     //auto self=shared_from_this();
     /*LengthInfo l(length);
     char lengthbuffer[sizeof(LengthInfo)+length]{ 0 };
@@ -145,6 +145,7 @@ void ChatClient::DoRead()
                         m_clientSocket.cancel();
                         auto self=shared_from_this();
                         m_bReadCancel=true;
+                        printf("disconnect\n");
                         m_ptrChatServer->removeDisconnetedClient(m_iId,self);
                     }
                     return;
@@ -183,9 +184,11 @@ void ChatClient::handleClientMessage(const std::string& message)
     std::stringstream ss(message);
     read_json(ss,pt);
 
+    printf("recv msg:%s\n",message.c_str());
+
     //首先获取这次得到的消息的类型
     int imessageType=pt.get<int>("type");
-    printf("type is::%d\n",imessageType);
+    //printf("type is::%d\n",imessageType);
     //根据消息的类型做相应的处理
     switch (imessageType)
     {
@@ -265,6 +268,12 @@ void ChatClient::handleClientMessage(const std::string& message)
             {
                 //TODO插入数据库中
             }
+        }
+        break;
+        //获取好友列表的请求
+    case static_cast<int>(MessageType::GetFriendList):
+        {
+            std::string userId=pt.get<std::string>("UserId");
         }
         break;
     default:
