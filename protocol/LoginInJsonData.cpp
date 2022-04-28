@@ -1,5 +1,10 @@
 #include "LoginInJsonData.h"
 
+LoginInJsonData::LoginInJsonData(const std::string& message)
+{
+    parse(message);
+}
+
 void LoginInJsonData::parse(const std::string& message)
 {
     if(message.empty())

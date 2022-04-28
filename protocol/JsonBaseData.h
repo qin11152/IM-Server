@@ -15,11 +15,13 @@ enum class MessageType
     RegisterResponse,
     LoginRequest,
     LoginResponse,
+    InitialRequest,
     GroupChat,
     SingleChat,
     AddFriendRequest,
     AddFriendResponse,
-    HeartPackage
+    HeartPackage,
+    GetFriendList
 };
 
 struct LengthInfo
