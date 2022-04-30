@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Mydefine.h"
 #include <mysql/mysql.h>
 #include <mysql/mysqld_error.h>
 #include <stdio.h>
@@ -7,6 +8,7 @@
 #include <iostream>
 #include <memory>
 #include <mutex>
+#include <vector>
 
 class MysqlQuery
 {
@@ -19,6 +21,8 @@ class MysqlQuery
         int GetCurrentUserCount();
         bool AddFriend(int friend_1,int friend_2);
         bool queryUserIsOnline(std::string userId);
+        //把获取的好友列表信息存储在vector中
+        void queryUserFrinedList(std::vector<FriendInfo>& vecFriendList,const std::string& strUserId);
     private:
         MysqlQuery(const char* ip,const char* database,const char* user,const char*password);
         static std::shared_ptr<MysqlQuery> m_ptrInstance;

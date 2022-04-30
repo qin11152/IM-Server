@@ -1,36 +1,12 @@
 #pragma once
 
+#include "Mydefine.h"
 #include "boost/property_tree/ptree.hpp"
 #include "boost/property_tree/json_parser.hpp"
 #include <string>
 #include <type_traits>
 #include <map>
 
-constexpr int PackageHeadSize=8;
-
-enum class MessageType
-{
-    Default,
-    RegisterRequest,
-    RegisterResponse,
-    LoginRequest,
-    LoginResponse,
-    InitialRequest,
-    GroupChat,
-    SingleChat,
-    AddFriendRequest,
-    AddFriendResponse,
-    HeartPackage,
-    GetFriendList
-};
-
-struct LengthInfo
-{
-    int length;
-    LengthInfo(int l):length(l){}
-};
-
-using MessageTypeBaseType=std::underlying_type<MessageType>;
 using namespace boost::property_tree;
 //all the json data used in communicate should inherit from this class
 class JsonBaseData

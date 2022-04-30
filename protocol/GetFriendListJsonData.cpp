@@ -7,6 +7,15 @@ GetFriendListJsonData::GetFriendListJsonData(const std::string& message /*= ""*/
 
 void GetFriendListJsonData::parse(const std::string& message)
 {
+    if (message.empty())
+    {
+        return;
+    }
+    ptree m_ptree;
+    std::stringstream sstream(message);
+    read_json(sstream, m_ptree);
+    m_strUserId=m_ptree.get<std::string>("UserId");
+    return;
 }
 
 std::string GetFriendListJsonData::generateJson()

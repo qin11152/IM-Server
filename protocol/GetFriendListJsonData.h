@@ -1,5 +1,5 @@
 #pragma once
-#include "../JsonBaseData.h"
+#include "JsonBaseData.h"
 
 class GetFriendListJsonData:public JsonBaseData
 {

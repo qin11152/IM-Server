@@ -119,7 +119,6 @@ bool MysqlQuery::queryUserIsOnline(std::string userId)
 {
     bool onlineState={false};
     std::string query="select online from user_info where id="+userId;
-    printf("%s\n",query.c_str());
     if(mysql_query(m_mysql,query.c_str()))
     {
         printf("query online state failed\n");
@@ -152,6 +151,47 @@ bool MysqlQuery::queryUserIsOnline(std::string userId)
     }
     mysql_free_result(res);
     return onlineState;
+}
+
+void MysqlQuery::queryUserFrinedList(std::vector<FriendInfo>& vecFriendList,const std::string& strUserId)
+{
+    std::string query="select id_friend,name from friend_info where id="+strUserId;
+    if(mysql_query(m_mysql,query.c_str()))
+    {
+        printf("query friend info failed,id=%s\n",strUserId);
+        return;
+    }
+    MYSQL_RES* res=nullptr;
+    //将查询的结果存储在res中
+    res=mysql_store_result(m_mysql);
+    //获取结果中的行数
+    int rowCount=mysql_num_rows(res);
+    //获取结果中的列数
+    int colCount=mysql_num_fields(res);
+    //存储列
+    MYSQL_FIELD* pField=nullptr;
+    //当还有列的时候就一直获取
+    //我们这里不需要列的信息
+    /*while(pField=mysql_fetch_field(res))
+    {
+         //可以存储列的名称
+         //操作是pField->name;
+    }*/
+    //获取行
+    MYSQL_ROW rowPtr=nullptr;
+    //有就一直获取
+    while(rowPtr=mysql_fetch_row(res))
+    {
+        //可以通过循环获取每一行的内容，每一行中
+        //这里一行两列
+        //类对象存储好友信息
+        FriendInfo tmp;
+        tmp.m_strFriendId=rowPtr[0];
+        tmp.m_strFriendName=rowPtr[1];
+        vecFriendList.push_back(tmp);
+    }
+    mysql_free_result(res);
+    return;
 }
 
 MysqlQuery::~MysqlQuery(){

@@ -5,6 +5,7 @@
 #include "LoginInReplyData.h"
 #include "InitialRequestJsonData.h"
 #include "SingleChatMessageJsonData.h"
+#include "GetFriendListReplyData.h"
 
 constexpr int kHeartPackageTime=300;
 //初始化的时候会把socket move过来，会保存服务器的指针，会定时5分钟的心跳保活
@@ -275,6 +276,11 @@ void ChatClient::handleClientMessage(const std::string& message)
         {
             std::string userId=pt.get<std::string>("UserId");
             //TODO查询表获取好友列表
+            GetFriendListReplyData getFriendListReplyData;
+            //getFriendListReplyData.m_vecFriendList=vecFriendList;
+            //std::vector<FriendInfo> vecFriendList;
+            MysqlQuery::Instance()->queryUserFrinedList(getFriendListReplyData.m_vecFriendList,userId);
+            DoWrite(getFriendListReplyData.generateJson(),getFriendListReplyData.generateJson().length());
         }
         break;
     default:
