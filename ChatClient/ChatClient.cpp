@@ -280,7 +280,8 @@ void ChatClient::handleClientMessage(const std::string& message)
             //getFriendListReplyData.m_vecFriendList=vecFriendList;
             //std::vector<FriendInfo> vecFriendList;
             MysqlQuery::Instance()->queryUserFrinedList(getFriendListReplyData.m_vecFriendList,userId);
-            DoWrite(getFriendListReplyData.generateJson(),getFriendListReplyData.generateJson().length());
+            auto sendStr=getFriendListReplyData.generateJson();
+            DoWrite(sendStr,getFriendListReplyData.generateJson().length());
         }
         break;
     default:

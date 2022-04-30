@@ -25,7 +25,7 @@ void GetFriendListReplyData::parse(const std::string& message)
         auto item=iter->second;
         //构建friendinfo对象
         FriendInfo tmp;
-        tmp.m_strFriendId=item.get<std::string >("");
+        tmp.m_strFriendId=item.get<std::string>("");
         //存储在vec中
         m_vecFriendList.push_back(tmp);
     }
