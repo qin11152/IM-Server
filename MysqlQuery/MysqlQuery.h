@@ -22,7 +22,7 @@ class MysqlQuery
         bool AddFriend(int friend_1,int friend_2);
         bool queryUserIsOnline(std::string userId);
         //把获取的好友列表信息存储在vector中
-        void queryUserFrinedList(std::vector<FriendInfo>& vecFriendList,const std::string& strUserId);
+        void queryUserFrinedList(std::vector<FriendInfo>& vecFriendList,std::string& strUserId);
     private:
         MysqlQuery(const char* ip,const char* database,const char* user,const char*password);
         static std::shared_ptr<MysqlQuery> m_ptrInstance;

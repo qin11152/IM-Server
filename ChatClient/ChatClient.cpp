@@ -277,8 +277,6 @@ void ChatClient::handleClientMessage(const std::string& message)
             std::string userId=pt.get<std::string>("UserId");
             //TODO查询表获取好友列表
             GetFriendListReplyData getFriendListReplyData;
-            //getFriendListReplyData.m_vecFriendList=vecFriendList;
-            //std::vector<FriendInfo> vecFriendList;
             MysqlQuery::Instance()->queryUserFrinedList(getFriendListReplyData.m_vecFriendList,userId);
             auto sendStr=getFriendListReplyData.generateJson();
             DoWrite(sendStr,getFriendListReplyData.generateJson().length());

@@ -4,8 +4,8 @@
 class FriendInfo
 {
 public:
-    std::string m_strFriendId{nullptr};      //好友的id
-    std::string m_strFriendName{nullptr};     //好友的昵称
+    std::string m_strFriendId{""};      //好友的id
+    std::string m_strFriendName{""};     //好友的昵称
 };
 
 constexpr int PackageHeadSize=8;
@@ -23,6 +23,8 @@ enum class MessageType
     AddFriendRequest,
     AddFriendResponse,
     HeartPackage,
+    FriendListRequest,
+    FriendListResponse,
     GetFriendList,
     GetFriendListReply
 };

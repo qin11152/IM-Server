@@ -6,7 +6,7 @@ HeartPackageJsonData::HeartPackageJsonData(const std::string& message)
 }
 void HeartPackageJsonData::parse(const std::string& message)
 {
-if (message.empty())
+    if (message.empty())
     {
         return;
     }

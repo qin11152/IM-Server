@@ -37,7 +37,7 @@ void MysqlQuery::initMysql(){
     if(m_mysql==NULL){
         printf("error occurs: %s\n",mysql_error(m_mysql));
     }else{
-        printf("connect successfully\n");
+        //printf("connect successfully\n");
     }
     mysql_query(m_mysql,"set names utf-8");
 }
@@ -153,9 +153,12 @@ bool MysqlQuery::queryUserIsOnline(std::string userId)
     return onlineState;
 }
 
-void MysqlQuery::queryUserFrinedList(std::vector<FriendInfo>& vecFriendList,const std::string& strUserId)
+void MysqlQuery::queryUserFrinedList(std::vector<FriendInfo>& vecFriendList,std::string& strUserId)
 {
-    std::string query="select id_friend,name from friend_info where id="+strUserId;
+    //printf("friend list user id:%s\n",strUserId.c_str());
+    //std::string query="select id_friend,name from friend_info where id_my="+strUserId;
+    std::string query="select id_friend,name from friend_info where id_my="+strUserId+" order by CONVERT( name USING gbk) COLLATE gbk_chinese_ci ASC";
+    //printf("%s\n",query.c_str());
     if(mysql_query(m_mysql,query.c_str()))
     {
         printf("query friend info failed,id=%s\n",strUserId);
@@ -172,11 +175,11 @@ void MysqlQuery::queryUserFrinedList(std::vector<FriendInfo>& vecFriendList,cons
     MYSQL_FIELD* pField=nullptr;
     //当还有列的时候就一直获取
     //我们这里不需要列的信息
-    /*while(pField=mysql_fetch_field(res))
-    {
+    //while(pField=mysql_fetch_field(res))
+    //{
          //可以存储列的名称
          //操作是pField->name;
-    }*/
+    //}
     //获取行
     MYSQL_ROW rowPtr=nullptr;
     //有就一直获取
