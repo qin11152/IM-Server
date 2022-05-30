@@ -96,17 +96,15 @@ bool MysqlQuery::VertifyPassword(int id,const std::string& password)
     
 }
 
-bool MysqlQuery::AddFriend(int friend_1,int friend_2)
+bool MysqlQuery::AddFriend(std::string friend_1,std::string friend_2)
 {
-    std::string query="insert into friend_info values("+std::to_string(friend_1)+","+
-    std::to_string(friend_2)+")";
+    std::string query="insert into friend_info values("+friend_1+","+friend_2+")";
     if(mysql_query(m_mysql,query.c_str()))
     {
         printf("insert into friend_info failed\n");
         return false;
     }
-    query="insert into friend_info values("+std::to_string(friend_2)+","+
-    std::to_string(friend_1)+")";
+    query="insert into friend_info values("+friend_2+","+friend_1+")";
     if(mysql_query(m_mysql,query.c_str()))
     {
         printf("insert into friend_info failed\n");
@@ -151,6 +149,40 @@ bool MysqlQuery::queryUserIsOnline(std::string userId)
     }
     mysql_free_result(res);
     return onlineState;
+}
+
+bool MysqlQuery::queryUserIsExist(std::string userId)
+{
+    bool isExist=false;
+    std::string query="select count(*) from user_info where id="+userId;
+    if(mysql_query(m_mysql,query.c_str()))
+    {
+        printf("query online state failed\n");
+        return false;
+    }
+    MYSQL_RES* res=nullptr;
+    //将查询的结果存储在res中
+    res=mysql_store_result(m_mysql);
+    //获取结果中的行数
+    int rowCount=mysql_num_rows(res);
+
+    //获取行
+    MYSQL_ROW rowPtr=nullptr;
+    //有就一直获取
+    while(rowPtr=mysql_fetch_row(res))
+    {
+        //可以通过循环获取每一行的内容，每一行中
+        //列的名称在上边已经进行了获取
+        //这里只有一行一列
+        isExist=rowPtr[0]==0?false:true;
+    }
+    mysql_free_result(res);
+    return isExist;
+}
+
+bool MysqlQuery::insertAddFriendCache(const std::string& requestId,const std::string& destinationId,const std::string& verifyMsg)
+{
+    std::string query="insert into add_friend values("+requestId+","+destinationId+","+verifyMsg+")";
 }
 
 void MysqlQuery::queryUserFrinedList(std::vector<FriendInfo>& vecFriendList,std::string& strUserId)

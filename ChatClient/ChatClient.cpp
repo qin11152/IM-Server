@@ -6,6 +6,8 @@
 #include "InitialRequestJsonData.h"
 #include "SingleChatMessageJsonData.h"
 #include "GetFriendListReplyData.h"
+#include "AddFriendResponseJsonData.h"
+#include "AddFriendRequestJsonData.h"
 
 constexpr int kHeartPackageTime=300;
 //初始化的时候会把socket move过来，会保存服务器的指针，会定时5分钟的心跳保活
@@ -213,8 +215,36 @@ void ChatClient::handleClientMessage(const std::string& message)
         break;
         //收到添加朋友类型的消息
     case static_cast<int>(MessageType::AddFriendRequest):
-    {}
+    {
+        AddFriendRequestJsonData addFriendRequestData(message);
+        //查看用户是否存在
+        if(MysqlQuery::Instance()->queryUserIsExist(addFriendRequestData.m_strFriendId))
+        {
+            if(MysqlQuery::Instance()->queryUserIsOnline(addFriendRequestData.m_strFriendId))
+            {
+                //如果在线，就直接转发消息就行了
+                DoWrite(message,message.length());
+            }
+            else
+            {
+                //存储在数据库中，上线后推送
+                MysqlQuery::Instance()->insertAddFriendCache(addFriendRequestData.m_strMyId,addFriendRequestData.m_strFriendId,addFriendRequestData.m_strVerifyMsg);
+            }
+        }
+    }
         break;
+        //添加好友的回复
+    case static_cast<int>(MessageType::AddFriendResponse):
+    {
+        AddFriendResponseJsonData addFriendResponseData(message);
+        //如果同意，双方的好友库里增加好友信息
+        if(addFriendResponseData.m_bResult)
+        {
+            MysqlQuery::Instance()->AddFriend(addFriendResponseData.m_strFriendId,addFriendResponseData.m_strMyId);
+        }
+        return;
+    }
+    break;
         //登录请求
     case static_cast<int>(MessageType::LoginRequest):
     {

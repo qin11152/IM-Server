@@ -19,10 +19,18 @@ class MysqlQuery
                             const std::string iconUrl,const std::string& signature="");
         bool VertifyPassword(int id,const std::string& password);
         int GetCurrentUserCount();
-        bool AddFriend(int friend_1,int friend_2);
+        //像数据库添加好友
+        bool AddFriend(std::string friend_1,std::string friend_2);
+        //查询用户是否在线
         bool queryUserIsOnline(std::string userId);
+        //查询用户是否存在
+        bool queryUserIsExist(std::string userId);
+        //把添加好友的信息缓存起来
+        bool insertAddFriendCache(const std::string& requestId,const std::string& destinationId,const std::string& verifyMsg);
         //把获取的好友列表信息存储在vector中
         void queryUserFrinedList(std::vector<FriendInfo>& vecFriendList,std::string& strUserId);
+
+
     private:
         MysqlQuery(const char* ip,const char* database,const char* user,const char*password);
         static std::shared_ptr<MysqlQuery> m_ptrInstance;
