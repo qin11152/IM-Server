@@ -22,6 +22,7 @@ enum class MessageType
     SingleChat,
     AddFriendRequest,
     AddFriendResponse,
+    AddFriendNotify,
     HeartPackage,
     FriendListRequest,
     FriendListResponse,

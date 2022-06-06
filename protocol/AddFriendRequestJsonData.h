@@ -12,5 +12,6 @@ public:
     std::string m_strMyId{ "" };
     std::string m_strFriendId{ "" };
     std::string m_strVerifyMsg{ "" };
+    std::string m_strName{ "" };
     MessageType m_strType{ MessageType::AddFriendRequest };
 };

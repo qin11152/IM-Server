@@ -8,6 +8,7 @@
 #include "GetFriendListReplyData.h"
 #include "AddFriendResponseJsonData.h"
 #include "AddFriendRequestJsonData.h"
+#include "AddFriendNotifyJsonData.h"
 
 constexpr int kHeartPackageTime=300;
 //初始化的时候会把socket move过来，会保存服务器的指针，会定时5分钟的心跳保活
@@ -241,6 +242,15 @@ void ChatClient::handleClientMessage(const std::string& message)
         if(addFriendResponseData.m_bResult)
         {
             MysqlQuery::Instance()->AddFriend(addFriendResponseData.m_strFriendId,addFriendResponseData.m_strMyId);
+            //通知双方你们已经是好友了
+            AddFriendNotify addFriendNotifyData;
+            addFriendNotifyData.m_strId1=addFriendResponseData.m_strFriendId;
+            addFriendNotifyData.m_strId2=addFriendResponseData.m_strMyId;
+            auto sendStr=addFriendNotifyData.generateJson();
+            //通知到好友
+            m_ptrChatServer->transferMessage(atoi(addFriendResponseData.m_strFriendId.c_str()),sendStr);
+            //通知到自己
+            DoWrite(sendStr,sendStr.length());
         }
         return;
     }
