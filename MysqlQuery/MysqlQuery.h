@@ -29,6 +29,8 @@ class MysqlQuery
         bool insertAddFriendCache(const std::string& requestId,const std::string& destinationId,const std::string& verifyMsg);
         //把获取的好友列表信息存储在vector中
         void queryUserFrinedList(std::vector<FriendInfo>& vecFriendList,std::string& strUserId);
+        //根据id查找名称
+        std::string queryUserNameAcordId(const std::string &id);
 
 
     private:

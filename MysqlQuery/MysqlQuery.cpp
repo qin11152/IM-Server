@@ -229,6 +229,35 @@ void MysqlQuery::queryUserFrinedList(std::vector<FriendInfo>& vecFriendList,std:
     return;
 }
 
+std::string MysqlQuery::queryUserNameAcordId(const std::string& id)
+{
+    std::string query="select name from user_info where id="+id;
+    if(mysql_query(m_mysql,query.c_str()))
+    {
+        printf("query user name failed\n");
+        return "";
+    }
+    std::string name="";
+    MYSQL_RES* res=nullptr;
+    //将查询的结果存储在res中
+    res=mysql_store_result(m_mysql);
+    //获取结果中的行数
+    int rowCount=mysql_num_rows(res);
+
+    //获取行
+    MYSQL_ROW rowPtr=nullptr;
+    //有就一直获取
+    while(rowPtr=mysql_fetch_row(res))
+    {
+        //可以通过循环获取每一行的内容，每一行中
+        //列的名称在上边已经进行了获取
+        //这里只有一行一列
+        name=rowPtr[0];
+    }
+    mysql_free_result(res);
+    return name;
+}
+
 MysqlQuery::~MysqlQuery(){
     mysql_close(m_mysql);
 }
