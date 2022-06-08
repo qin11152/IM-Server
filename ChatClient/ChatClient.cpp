@@ -246,6 +246,8 @@ void ChatClient::handleClientMessage(const std::string& message)
             AddFriendNotify addFriendNotifyData;
             addFriendNotifyData.m_strId1=addFriendResponseData.m_strFriendId;
             addFriendNotifyData.m_strId2=addFriendResponseData.m_strMyId;
+            addFriendNotifyData.m_strName1=MysqlQuery::Instance()->queryUserNameAcordId(addFriendResponseData.m_strFriendId);
+            addFriendNotifyData.m_strName2=MysqlQuery::Instance()->queryUserNameAcordId(addFriendResponseData.m_strMyId);
             auto sendStr=addFriendNotifyData.generateJson();
             //通知到好友
             m_ptrChatServer->transferMessage(atoi(addFriendResponseData.m_strFriendId.c_str()),sendStr);
