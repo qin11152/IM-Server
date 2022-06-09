@@ -16,7 +16,7 @@ void AddFriendRequestJsonData::parse(const std::string& message/*=""*/)
     read_json(sstream, m_ptree);
     m_strMyId = m_ptree.get<std::string>("MyId");
     m_strFriendId = m_ptree.get<std::string>("FriendId");
-    m_strVerifyMsg = m_ptree.get<bool>("VerifyMsg");
+    m_strVerifyMsg = m_ptree.get<std::string>("VerifyMsg");
     m_strName = m_ptree.get<std::string>("Name");
     return;
 }

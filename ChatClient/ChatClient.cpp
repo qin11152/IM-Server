@@ -223,11 +223,14 @@ void ChatClient::handleClientMessage(const std::string& message)
         {
             if(MysqlQuery::Instance()->queryUserIsOnline(addFriendRequestData.m_strFriendId))
             {
+                printf("online\n");
                 //如果在线，就直接转发消息就行了
-                DoWrite(message,message.length());
+                auto msg=message;
+                m_ptrChatServer->transferMessage(atoi(addFriendRequestData.m_strFriendId.c_str()),msg);
             }
             else
             {
+                printf("not online\n");
                 //存储在数据库中，上线后推送
                 MysqlQuery::Instance()->insertAddFriendCache(addFriendRequestData.m_strMyId,addFriendRequestData.m_strFriendId,addFriendRequestData.m_strVerifyMsg);
             }
@@ -288,10 +291,11 @@ void ChatClient::handleClientMessage(const std::string& message)
     case static_cast<int>(MessageType::InitialRequest):
         {
             //解析出消息，得到id，存储下来
-            //TODO 解析出id
             std::string userId=pt.get<std::string>("UserId");
             m_iId=atoi(userId.c_str());
             m_ptrChatServer->insertIntoIdMap(atoi(userId.c_str()),shared_from_this());
+            MysqlQuery::Instance()->updateUserOnlineState(userId,true);
+            //TODO推送缓存的聊天消息和添加好友请求
         }
         break;
     //点对点聊天信息
