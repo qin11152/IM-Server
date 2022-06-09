@@ -223,7 +223,6 @@ void ChatClient::handleClientMessage(const std::string& message)
         {
             if(MysqlQuery::Instance()->queryUserIsOnline(addFriendRequestData.m_strFriendId))
             {
-                printf("online\n");
                 //如果在线，就直接转发消息就行了
                 auto msg=message;
                 m_ptrChatServer->transferMessage(atoi(addFriendRequestData.m_strFriendId.c_str()),msg);

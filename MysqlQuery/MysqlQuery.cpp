@@ -129,14 +129,8 @@ bool MysqlQuery::queryUserIsOnline(std::string userId)
     int rowCount=mysql_num_rows(res);
     //获取结果中的列数
     int colCount=mysql_num_fields(res);
-    //存储列
-    MYSQL_FIELD* pField=nullptr;
+
     //当还有列的时候就一直获取
-    while(pField=mysql_fetch_field(res))
-    {
-         //可以存储列的名称
-         //操作是pField->name;
-    }
     //获取行
     MYSQL_ROW rowPtr=nullptr;
     //有就一直获取
@@ -145,10 +139,24 @@ bool MysqlQuery::queryUserIsOnline(std::string userId)
         //可以通过循环获取每一行的内容，每一行中
         //列的名称在上边已经进行了获取
         //这里只有一行一列
-        onlineState=rowPtr[0];
+        int tmpi=atoi(rowPtr[0]);
+        onlineState=tmpi==0?false:true;
     }
     mysql_free_result(res);
     return onlineState;
+}
+
+bool MysqlQuery::updateUserOnlineState(std::string userId,bool onlineState)
+{
+    std::string strOnlineState=onlineState?"1":"0";
+    std::string query="update user_info set online="+strOnlineState+" where id="+userId;
+    printf("update query is %s\n",query.c_str());
+    if(mysql_query(m_mysql,query.c_str()))
+    {
+        printf("update online state failed\n");
+        return false;
+    }
+    return true;
 }
 
 bool MysqlQuery::queryUserIsExist(std::string userId)
@@ -183,6 +191,12 @@ bool MysqlQuery::queryUserIsExist(std::string userId)
 bool MysqlQuery::insertAddFriendCache(const std::string& requestId,const std::string& destinationId,const std::string& verifyMsg)
 {
     std::string query="insert into add_friend values("+requestId+","+destinationId+","+verifyMsg+")";
+    if(mysql_query(m_mysql,query.c_str()))
+    {
+        printf("insert friend info failed\n");
+        return false;
+    }
+    return true;
 }
 
 void MysqlQuery::queryUserFrinedList(std::vector<FriendInfo>& vecFriendList,std::string& strUserId)
