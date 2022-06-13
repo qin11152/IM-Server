@@ -252,7 +252,11 @@ void ChatClient::handleClientMessage(const std::string& message)
             addFriendNotifyData.m_strName2=MysqlQuery::Instance()->queryUserNameAcordId(addFriendResponseData.m_strMyId);
             auto sendStr=addFriendNotifyData.generateJson();
             //通知到好友
-            m_ptrChatServer->transferMessage(atoi(addFriendResponseData.m_strFriendId.c_str()),sendStr);
+            //查看好友是否在线，在线就通知
+            if(MysqlQuery::Instance()->queryUserIsOnline(addFriendResponseData.m_strFriendId))
+            {
+                m_ptrChatServer->transferMessage(atoi(addFriendResponseData.m_strFriendId.c_str()),sendStr);
+            }
             //通知到自己
             DoWrite(sendStr,sendStr.length());
         }
@@ -295,6 +299,28 @@ void ChatClient::handleClientMessage(const std::string& message)
             m_ptrChatServer->insertIntoIdMap(atoi(userId.c_str()),shared_from_this());
             MysqlQuery::Instance()->updateUserOnlineState(userId,true);
             //TODO推送缓存的聊天消息和添加好友请求
+            std::vector<MyAddFriendInfo> vecCachedAddFriend;
+            MysqlQuery::Instance()->queryCachedAddFriendInfo(vecCachedAddFriend,userId);
+            for(auto& item:vecCachedAddFriend)
+            {
+                AddFriendRequestJsonData tmp;
+                tmp.m_strFriendId=item.m_strFriendId;
+                tmp.m_strMyId=item.m_strMyId;
+                tmp.m_strName=MysqlQuery::Instance()->queryUserNameAcordId(tmp.m_strFriendId);
+                tmp.m_strVerifyMsg=item.m_strVerifyMsg;
+                DoWrite(tmp.generateJson(),tmp.generateJson().length());
+            }
+            std::vector<MyChatMessageInfo> vecCachedChatInfo;
+            MysqlQuery::Instance()->queryCachedChatMessageInfo(vecCachedChatInfo,userId);
+            for(auto & item:vecCachedChatInfo)
+            {
+                SingleChatMessageJsonData tmp;
+                tmp.m_strMessage=item.m_strChatMsg;
+                tmp.m_strRecvUserId=item.m_strToId;
+                tmp.m_strSendUserId=item.m_strFromId;
+                DoWrite(tmp.generateJson(),tmp.generateJson().length());
+            }
+
         }
         break;
     //点对点聊天信息

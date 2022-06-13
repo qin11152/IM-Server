@@ -24,6 +24,7 @@ std::string AddFriendResponseJsonData::generateJson()
 {
     ptree m_ptree;
 
+    m_ptree.put("type",static_cast<int>(m_strType));
     m_ptree.put("MyId",m_strMyId.c_str());
     m_ptree.put("FriendId",m_strFriendId.c_str());
     m_ptree.put("AddFriendResult",m_bResult);

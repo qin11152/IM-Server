@@ -37,3 +37,28 @@ struct LengthInfo
 };
 
 using MessageTypeBaseType=std::underlying_type<MessageType>;
+
+struct MyAddFriendInfo
+{
+    std::string m_strMyId{""};
+    std::string m_strFriendId{""};
+    std::string m_strVerifyMsg{""};
+    MyAddFriendInfo(std::string myId="",std::string friendId="",std::string verifyMsg="")
+    :m_strMyId(myId),
+    m_strFriendId(friendId),
+    m_strVerifyMsg(verifyMsg)
+    {}
+};
+
+struct MyChatMessageInfo
+{
+    std::string m_strFromId{""};
+    std::string m_strToId{""};
+    std::string m_strChatMsg{""};
+    MyChatMessageInfo(std::string fromId="",std::string toId="",std::string chatMsg="")
+    :m_strFromId(fromId),
+    m_strToId(toId),
+    m_strChatMsg(chatMsg)
+    {}
+};
+

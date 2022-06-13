@@ -199,6 +199,93 @@ bool MysqlQuery::insertAddFriendCache(const std::string& requestId,const std::st
     return true;
 }
 
+bool MysqlQuery::queryCachedAddFriendInfo(std::vector<MyAddFriendInfo>& vecFriednInfo,std::string& id)
+{
+    std::string query="select * from add_friend where myId="+id;
+
+    if(mysql_query(m_mysql,query.c_str()))
+    {
+        printf("query add friend info failed,id=%s\n",id);
+        return false;
+    }
+
+    MYSQL_RES* res=nullptr;
+    //将查询的结果存储在res中
+    res=mysql_store_result(m_mysql);
+    //获取结果中的行数
+    int rowCount=mysql_num_rows(res);
+    //获取结果中的列数
+    int colCount=mysql_num_fields(res);
+    //存储列
+    MYSQL_FIELD* pField=nullptr;
+    //当还有列的时候就一直获取
+    //我们这里不需要列的信息
+    //while(pField=mysql_fetch_field(res))
+    //{
+         //可以存储列的名称
+         //操作是pField->name;
+    //}
+    //获取行
+    MYSQL_ROW rowPtr=nullptr;
+    //有就一直获取
+    while(rowPtr=mysql_fetch_row(res))
+    {
+        //可以通过循环获取每一行的内容，每一行中
+        //这里一行两列
+        //类对象存储好友信息
+        MyAddFriendInfo tmp;
+        tmp.m_strFriendId=rowPtr[0];
+        tmp.m_strMyId=rowPtr[1];
+        tmp.m_strVerifyMsg=rowPtr[2];
+        vecFriednInfo.push_back(tmp);
+    }
+    mysql_free_result(res);
+    return true;
+}
+
+bool MysqlQuery::queryCachedChatMessageInfo(std::vector<MyChatMessageInfo>& vecFriednInfo,std::string& id)
+{
+    std::string query="select * from chat_message_cache where toid="+id;
+    if(mysql_query(m_mysql,query.c_str()))
+    {
+        printf("query add cached chat info failed,id=%s\n",id);
+        return false;
+    }
+
+    MYSQL_RES* res=nullptr;
+    //将查询的结果存储在res中
+    res=mysql_store_result(m_mysql);
+    //获取结果中的行数
+    int rowCount=mysql_num_rows(res);
+    //获取结果中的列数
+    int colCount=mysql_num_fields(res);
+    //存储列
+    MYSQL_FIELD* pField=nullptr;
+    //当还有列的时候就一直获取
+    //我们这里不需要列的信息
+    //while(pField=mysql_fetch_field(res))
+    //{
+         //可以存储列的名称
+         //操作是pField->name;
+    //}
+    //获取行
+    MYSQL_ROW rowPtr=nullptr;
+    //有就一直获取
+    while(rowPtr=mysql_fetch_row(res))
+    {
+        //可以通过循环获取每一行的内容，每一行中
+        //这里一行两列
+        //类对象存储好友信息
+        MyChatMessageInfo tmp;
+        tmp.m_strFromId=rowPtr[0];
+        tmp.m_strToId=rowPtr[1];
+        tmp.m_strChatMsg=rowPtr[2];
+        vecFriednInfo.push_back(tmp);
+    }
+    mysql_free_result(res);
+    return true;
+}
+
 void MysqlQuery::queryUserFrinedList(std::vector<FriendInfo>& vecFriendList,std::string& strUserId)
 {
     //printf("friend list user id:%s\n",strUserId.c_str());

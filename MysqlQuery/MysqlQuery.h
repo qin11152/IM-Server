@@ -23,10 +23,16 @@ class MysqlQuery
         bool AddFriend(std::string friend_1,std::string friend_2);
         //查询用户是否在线
         bool queryUserIsOnline(std::string userId);
+        //修改用户在线状态
+        bool updateUserOnlineState(std::string userId,bool onlineState);
         //查询用户是否存在
         bool queryUserIsExist(std::string userId);
         //把添加好友的信息缓存起来
         bool insertAddFriendCache(const std::string& requestId,const std::string& destinationId,const std::string& verifyMsg);
+        //从数据库中得到缓存的添加好友的消息
+        bool queryCachedAddFriendInfo(std::vector<MyAddFriendInfo>& vecFriednInfo,std::string& id);
+        //从数据库中得到缓存的聊天消息
+        bool queryCachedChatMessageInfo(std::vector<MyChatMessageInfo>& vecFriednInfo,std::string& id);
         //把获取的好友列表信息存储在vector中
         void queryUserFrinedList(std::vector<FriendInfo>& vecFriendList,std::string& strUserId);
         //根据id查找名称

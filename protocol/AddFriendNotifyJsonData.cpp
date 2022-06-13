@@ -25,6 +25,7 @@ std::string AddFriendNotify::generateJson()
 {
     ptree m_ptree;
 
+    m_ptree.put("type",static_cast<int>(m_strType));
     m_ptree.put("Id1",m_strId1.c_str());
     m_ptree.put("Id2",m_strId2.c_str());
     m_ptree.put("Name1",m_strName1.c_str());
