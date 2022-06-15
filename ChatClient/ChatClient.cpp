@@ -320,7 +320,6 @@ void ChatClient::handleClientMessage(const std::string& message)
                 tmp.m_strSendUserId=item.m_strFromId;
                 DoWrite(tmp.generateJson(),tmp.generateJson().length());
             }
-
         }
         break;
     //点对点聊天信息
