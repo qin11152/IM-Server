@@ -243,7 +243,18 @@ bool MysqlQuery::queryCachedAddFriendInfo(std::vector<MyAddFriendInfo>& vecFried
     return true;
 }
 
-bool MysqlQuery::queryCachedChatMessageInfo(std::vector<MyChatMessageInfo>& vecFriednInfo,std::string& id)
+bool MysqlQuery::deleteCachedAddFriendInfo(std::string& id)
+{
+    std::string query="delete from add_friend where myId="+id;
+    if(!mysql_query(m_mysql,query.c_str()))
+    {
+        printf("delete cached add friend info failed ,myid is:%s",id);
+        return false;
+    }
+    return true;
+}
+
+bool MysqlQuery::queryCachedChatMsg(std::vector<MyChatMessageInfo>& vecFriednInfo,std::string& id)
 {
     std::string query="select * from chat_message_cache where toid="+id;
     if(mysql_query(m_mysql,query.c_str()))
@@ -283,6 +294,28 @@ bool MysqlQuery::queryCachedChatMessageInfo(std::vector<MyChatMessageInfo>& vecF
         vecFriednInfo.push_back(tmp);
     }
     mysql_free_result(res);
+    return true;
+}
+
+bool MysqlQuery::insertCachedChatMsg(std::string& fromId,std::string& toId,std::string& msg)
+{
+    std::string query="insert into chat_message_cache values("+fromId+","+toId+",\""+msg+"\")";
+    if(mysql_query(m_mysql,query.c_str()))
+    {
+        printf("insert cached chat info failed,fromid=%s\n",fromId);
+        return false;
+    }
+    return true;
+}
+
+bool MysqlQuery::deleteCachedChatMsg(std::string& id)
+{
+    std::string query="delete from chat_message_cache values where toId="+id;
+    if(mysql_query(m_mysql,query.c_str()))
+    {
+        printf("delete cached chat info failed,fromid=%s\n",id);
+        return false;
+    }
     return true;
 }
 

@@ -301,6 +301,7 @@ void ChatClient::handleClientMessage(const std::string& message)
             //TODO推送缓存的聊天消息和添加好友请求
             std::vector<MyAddFriendInfo> vecCachedAddFriend;
             MysqlQuery::Instance()->queryCachedAddFriendInfo(vecCachedAddFriend,userId);
+            MysqlQuery::Instance()->deleteCachedAddFriendInfo(userId);
             for(auto& item:vecCachedAddFriend)
             {
                 AddFriendRequestJsonData tmp;
@@ -311,7 +312,8 @@ void ChatClient::handleClientMessage(const std::string& message)
                 DoWrite(tmp.generateJson(),tmp.generateJson().length());
             }
             std::vector<MyChatMessageInfo> vecCachedChatInfo;
-            MysqlQuery::Instance()->queryCachedChatMessageInfo(vecCachedChatInfo,userId);
+            MysqlQuery::Instance()->queryCachedChatMsg(vecCachedChatInfo,userId);
+            MysqlQuery::Instance()->deleteCachedChatMsg(userId);
             for(auto & item:vecCachedChatInfo)
             {
                 SingleChatMessageJsonData tmp;
@@ -325,19 +327,21 @@ void ChatClient::handleClientMessage(const std::string& message)
     //点对点聊天信息
     case static_cast<int>(MessageType::SingleChat):
         {
-            std::string recvId=pt.get<std::string>("RecvUserId");
+            SingleChatMessageJsonData singleChatData(message);
+            //std::string recvId=pt.get<std::string>("RecvUserId");
             //获取一下要接受消息的人的在线状态
-            bool onlineState=MysqlQuery::Instance()->queryUserIsOnline(recvId);
+            bool onlineState=MysqlQuery::Instance()->queryUserIsOnline(singleChatData.m_strRecvUserId);
             //printf("single\n");
             //如果在线，就转发
             if(onlineState)
             {
                 std::string sendMessage=message;
-                m_ptrChatServer->transferMessage(atoi(recvId.c_str()),sendMessage);
+                m_ptrChatServer->transferMessage(atoi(singleChatData.m_strRecvUserId.c_str()),sendMessage);
             }
             else
             {
                 //TODO插入数据库中
+                MysqlQuery::Instance()->insertCachedChatMsg(singleChatData.m_strSendUserId,singleChatData.m_strRecvUserId,singleChatData.m_strMessage);
             }
         }
         break;

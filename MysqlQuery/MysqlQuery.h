@@ -31,8 +31,14 @@ class MysqlQuery
         bool insertAddFriendCache(const std::string& requestId,const std::string& destinationId,const std::string& verifyMsg);
         //从数据库中得到缓存的添加好友的消息
         bool queryCachedAddFriendInfo(std::vector<MyAddFriendInfo>& vecFriednInfo,std::string& id);
+        //获取完就删除了缓存的添加好友消息
+        bool deleteCachedAddFriendInfo(std::string& id);
         //从数据库中得到缓存的聊天消息
-        bool queryCachedChatMessageInfo(std::vector<MyChatMessageInfo>& vecFriednInfo,std::string& id);
+        bool queryCachedChatMsg(std::vector<MyChatMessageInfo>& vecFriednInfo,std::string& id);
+        //把点对点聊天消息缓存起来，好友不在线时用的
+        bool insertCachedChatMsg(std::string& fromId,std::string& toId,std::string& msg);
+        //从数据库中删除缓存的聊天消息
+        bool deleteCachedChatMsg(std::string& id);
         //把获取的好友列表信息存储在vector中
         void queryUserFrinedList(std::vector<FriendInfo>& vecFriendList,std::string& strUserId);
         //根据id查找名称
