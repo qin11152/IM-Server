@@ -6,7 +6,7 @@ std::shared_ptr<MysqlQuery> MysqlQuery::m_ptrInstance={nullptr};
 const char* kIp="127.0.0.1";
 const char* kDataBase="chat_data";
 const char* kUser="root";
-const char* kPassword="qinbiao9704";
+const char* kPassword="root";
 
 std::shared_ptr<MysqlQuery> MysqlQuery::Instance()
 {
@@ -98,7 +98,7 @@ bool MysqlQuery::VertifyPassword(int id,const std::string& password)
 
 bool MysqlQuery::AddFriend(std::string friend_1,std::string friend_2)
 {
-    std::string query="insert into friend_info values("+friend_1+","+friend_2+")";
+    std::string query="insert into friend_info values(\""+friend_1+"\",\""+friend_2+"\")";
     if(mysql_query(m_mysql,query.c_str()))
     {
         printf("insert into friend_info failed\n");
@@ -190,10 +190,11 @@ bool MysqlQuery::queryUserIsExist(std::string userId)
 
 bool MysqlQuery::insertAddFriendCache(const std::string& requestId,const std::string& destinationId,const std::string& verifyMsg)
 {
-    std::string query="insert into add_friend values("+requestId+","+destinationId+","+verifyMsg+")";
+    std::string query="insert into add_friend values(\""+requestId+"\",\""+destinationId+"\",\""+verifyMsg+"\")";
+    printf("add friend query id:%s",query.c_str());
     if(mysql_query(m_mysql,query.c_str()))
     {
-        printf("insert friend info failed\n");
+        printf("insert add friend info failed\n");
         return false;
     }
     return true;
@@ -201,8 +202,8 @@ bool MysqlQuery::insertAddFriendCache(const std::string& requestId,const std::st
 
 bool MysqlQuery::queryCachedAddFriendInfo(std::vector<MyAddFriendInfo>& vecFriednInfo,std::string& id)
 {
-    std::string query="select * from add_friend where myId="+id;
-
+    std::string query="select * from add_friend where myId=\""+id+"\"";
+    printf("query add friend info id=%s\n",id.c_str());
     if(mysql_query(m_mysql,query.c_str()))
     {
         printf("query add friend info failed,id=%s\n",id);
@@ -245,10 +246,10 @@ bool MysqlQuery::queryCachedAddFriendInfo(std::vector<MyAddFriendInfo>& vecFried
 
 bool MysqlQuery::deleteCachedAddFriendInfo(std::string& id)
 {
-    std::string query="delete from add_friend where myId="+id;
+    std::string query="delete from add_friend where myId=\""+id+"\"";
     if(!mysql_query(m_mysql,query.c_str()))
     {
-        printf("delete cached add friend info failed ,myid is:%s",id);
+        printf("delete cached add friend info failed ,myid is:%s",id.c_str());
         return false;
     }
     return true;
@@ -256,10 +257,10 @@ bool MysqlQuery::deleteCachedAddFriendInfo(std::string& id)
 
 bool MysqlQuery::queryCachedChatMsg(std::vector<MyChatMessageInfo>& vecFriednInfo,std::string& id)
 {
-    std::string query="select * from chat_message_cache where toid="+id;
+    std::string query="select * from chat_message_cache where toid=\""+id+"\"";
     if(mysql_query(m_mysql,query.c_str()))
     {
-        printf("query add cached chat info failed,id=%s\n",id);
+        printf("query add cached chat info failed,id=%s\n",id.c_str());
         return false;
     }
 
@@ -299,7 +300,8 @@ bool MysqlQuery::queryCachedChatMsg(std::vector<MyChatMessageInfo>& vecFriednInf
 
 bool MysqlQuery::insertCachedChatMsg(std::string& fromId,std::string& toId,std::string& msg)
 {
-    std::string query="insert into chat_message_cache values("+fromId+","+toId+",\""+msg+"\")";
+    std::string query="insert into chat_message_cache values(\""+fromId+"\",\""+toId+"\",\""+msg+"\")";
+    printf("insert cached msg query is:%s\n",query.c_str());
     if(mysql_query(m_mysql,query.c_str()))
     {
         printf("insert cached chat info failed,fromid=%s\n",fromId);
@@ -310,10 +312,10 @@ bool MysqlQuery::insertCachedChatMsg(std::string& fromId,std::string& toId,std::
 
 bool MysqlQuery::deleteCachedChatMsg(std::string& id)
 {
-    std::string query="delete from chat_message_cache values where toId="+id;
+    std::string query="delete from chat_message_cache values where toId=\""+id+"\"";
     if(mysql_query(m_mysql,query.c_str()))
     {
-        printf("delete cached chat info failed,fromid=%s\n",id);
+        printf("delete cached chat info failed,fromid=%s\n",id.c_str());
         return false;
     }
     return true;
@@ -323,7 +325,7 @@ void MysqlQuery::queryUserFrinedList(std::vector<FriendInfo>& vecFriendList,std:
 {
     //printf("friend list user id:%s\n",strUserId.c_str());
     //std::string query="select id_friend,name from friend_info where id_my="+strUserId;
-    std::string query="select id_friend,name from friend_info where id_my="+strUserId+" order by CONVERT( name USING gbk) COLLATE gbk_chinese_ci ASC";
+    std::string query="select id_friend, name from friend_info where id_my=\""+strUserId+"\" order by CONVERT( name USING gbk) COLLATE gbk_chinese_ci ASC";
     //printf("%s\n",query.c_str());
     if(mysql_query(m_mysql,query.c_str()))
     {
@@ -366,6 +368,7 @@ void MysqlQuery::queryUserFrinedList(std::vector<FriendInfo>& vecFriendList,std:
 std::string MysqlQuery::queryUserNameAcordId(const std::string& id)
 {
     std::string query="select name from user_info where id="+id;
+    printf("query user name query is:%s\n",query.c_str());
     if(mysql_query(m_mysql,query.c_str()))
     {
         printf("query user name failed\n");

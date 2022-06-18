@@ -10,5 +10,6 @@ public:
     std::string generateJson()override;
 
     bool m_bLoginInResult{ false };
+    std::string m_strUserName{""};
     MessageType m_strType{ MessageType::LoginResponse };
 };

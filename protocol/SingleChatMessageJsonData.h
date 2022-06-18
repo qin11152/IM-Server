@@ -12,5 +12,6 @@ public:
     std::string m_strSendUserId{ "-1" };
     std::string m_strRecvUserId{ "-1" };
     std::string m_strMessage{ "" };
+    std::string m_strTime{ "" };
     MessageType m_strType{ MessageType::SingleChat };
 };

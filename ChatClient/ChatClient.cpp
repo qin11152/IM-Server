@@ -196,7 +196,7 @@ void ChatClient::handleClientMessage(const std::string& message)
     //根据消息的类型做相应的处理
     switch (imessageType)
     {
-        //收到注册类型的消息
+    //收到注册类型的消息
     case static_cast<int>(MessageType::RegisterRequest):
         {
             std::string userName=pt.get<std::string>("UserName");
@@ -214,71 +214,72 @@ void ChatClient::handleClientMessage(const std::string& message)
             DoWrite(replyMessage,replyMessage.length());
         }
         break;
-        //收到添加朋友类型的消息
+    //收到添加朋友类型的消息    
     case static_cast<int>(MessageType::AddFriendRequest):
-    {
-        AddFriendRequestJsonData addFriendRequestData(message);
-        //查看用户是否存在
-        if(MysqlQuery::Instance()->queryUserIsExist(addFriendRequestData.m_strFriendId))
         {
-            if(MysqlQuery::Instance()->queryUserIsOnline(addFriendRequestData.m_strFriendId))
+            AddFriendRequestJsonData addFriendRequestData(message);
+            //查看用户是否存在
+            if(MysqlQuery::Instance()->queryUserIsExist(addFriendRequestData.m_strFriendId))
             {
-                //如果在线，就直接转发消息就行了
-                auto msg=message;
-                m_ptrChatServer->transferMessage(atoi(addFriendRequestData.m_strFriendId.c_str()),msg);
-            }
-            else
-            {
-                printf("not online\n");
-                //存储在数据库中，上线后推送
-                MysqlQuery::Instance()->insertAddFriendCache(addFriendRequestData.m_strMyId,addFriendRequestData.m_strFriendId,addFriendRequestData.m_strVerifyMsg);
+                if(MysqlQuery::Instance()->queryUserIsOnline(addFriendRequestData.m_strFriendId))
+                {
+                    //如果在线，就直接转发消息就行了
+                    auto msg=message;
+                    m_ptrChatServer->transferMessage(atoi(addFriendRequestData.m_strFriendId.c_str()),msg);
+                }
+                else
+                {
+                    printf("not online\n");
+                    //存储在数据库中，上线后推送
+                    MysqlQuery::Instance()->insertAddFriendCache(addFriendRequestData.m_strMyId,addFriendRequestData.m_strFriendId,addFriendRequestData.m_strVerifyMsg);
+                }
             }
         }
-    }
         break;
-        //添加好友的回复
+    //同意或不同意添加好友
     case static_cast<int>(MessageType::AddFriendResponse):
-    {
-        AddFriendResponseJsonData addFriendResponseData(message);
-        //如果同意，双方的好友库里增加好友信息
-        if(addFriendResponseData.m_bResult)
         {
-            MysqlQuery::Instance()->AddFriend(addFriendResponseData.m_strFriendId,addFriendResponseData.m_strMyId);
-            //通知双方你们已经是好友了
-            AddFriendNotify addFriendNotifyData;
-            addFriendNotifyData.m_strId1=addFriendResponseData.m_strFriendId;
-            addFriendNotifyData.m_strId2=addFriendResponseData.m_strMyId;
-            addFriendNotifyData.m_strName1=MysqlQuery::Instance()->queryUserNameAcordId(addFriendResponseData.m_strFriendId);
-            addFriendNotifyData.m_strName2=MysqlQuery::Instance()->queryUserNameAcordId(addFriendResponseData.m_strMyId);
-            auto sendStr=addFriendNotifyData.generateJson();
-            //通知到好友
-            //查看好友是否在线，在线就通知
-            if(MysqlQuery::Instance()->queryUserIsOnline(addFriendResponseData.m_strFriendId))
+            AddFriendResponseJsonData addFriendResponseData(message);
+            //如果同意，双方的好友库里增加好友信息
+            if(addFriendResponseData.m_bResult)
             {
-                m_ptrChatServer->transferMessage(atoi(addFriendResponseData.m_strFriendId.c_str()),sendStr);
+                MysqlQuery::Instance()->AddFriend(addFriendResponseData.m_strFriendId,addFriendResponseData.m_strMyId);
+                //通知双方你们已经是好友了
+                AddFriendNotify addFriendNotifyData;
+                addFriendNotifyData.m_strId1=addFriendResponseData.m_strFriendId;
+                addFriendNotifyData.m_strId2=addFriendResponseData.m_strMyId;
+                addFriendNotifyData.m_strName1=MysqlQuery::Instance()->queryUserNameAcordId(addFriendResponseData.m_strFriendId);
+                addFriendNotifyData.m_strName2=MysqlQuery::Instance()->queryUserNameAcordId(addFriendResponseData.m_strMyId);
+                auto sendStr=addFriendNotifyData.generateJson();
+                //通知到好友
+                //查看好友是否在线，在线就通知
+                if(MysqlQuery::Instance()->queryUserIsOnline(addFriendResponseData.m_strFriendId))
+                {
+                    m_ptrChatServer->transferMessage(atoi(addFriendResponseData.m_strFriendId.c_str()),sendStr);
+                }
+                //通知到自己
+                DoWrite(sendStr,sendStr.length());
             }
-            //通知到自己
-            DoWrite(sendStr,sendStr.length());
+            return;
         }
-        return;
-    }
-    break;
-        //登录请求
+        break;
+    //登录请求
     case static_cast<int>(MessageType::LoginRequest):
-    {
-        std::string userId=pt.get<std::string>("UserId");
-        std::string password=pt.get<std::string>("UserPassword");
-        bool logInState=false;
-        //查询一下数据库
-        if(MysqlQuery::Instance()->VertifyPassword(atoi(userId.c_str()),password))
         {
-            logInState=true;
-        }
-        LoginInReplyData logInReplyData;
-        logInReplyData.m_bLoginInResult=logInState;
-        std::string loginReplyMessage=logInReplyData.generateJson();
-        DoWrite(loginReplyMessage,loginReplyMessage.length());
-    }
+            std::string userId=pt.get<std::string>("UserId");
+            std::string password=pt.get<std::string>("UserPassword");
+            bool logInState=false;
+            //查询一下数据库
+            if(MysqlQuery::Instance()->VertifyPassword(atoi(userId.c_str()),password))
+            {
+                logInState=true;
+            }
+            LoginInReplyData logInReplyData;
+            logInReplyData.m_strUserName=MysqlQuery::Instance()->queryUserNameAcordId(userId);
+            logInReplyData.m_bLoginInResult=logInState;
+            std::string loginReplyMessage=logInReplyData.generateJson();
+            DoWrite(loginReplyMessage,loginReplyMessage.length());
+            }
         break;
     //客户端发来的心跳包
     case static_cast<int>(MessageType::HeartPackage):
@@ -290,7 +291,7 @@ void ChatClient::handleClientMessage(const std::string& message)
             m_timer.async_wait(std::bind(&ChatClient::removeSelfFromServer,this));
         }
         break;
-        //用户第一次登录上发来的初始化消息
+    //用户第一次登录上发来的初始化消息
     case static_cast<int>(MessageType::InitialRequest):
         {
             //解析出消息，得到id，存储下来
@@ -345,7 +346,7 @@ void ChatClient::handleClientMessage(const std::string& message)
             }
         }
         break;
-        //获取好友列表的请求
+    //获取好友列表的请求
     case static_cast<int>(MessageType::GetFriendList):
         {
             std::string userId=pt.get<std::string>("UserId");

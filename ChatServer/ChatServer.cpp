@@ -25,6 +25,7 @@ void ChatServer::DoAccept()
 
 void ChatServer::removeDisconnetedClient(int id,std::shared_ptr<ChatClient> ptr)
 {
+    MysqlQuery::Instance()->updateUserOnlineState(std::to_string(id),false);
     if(m_idMap.find(id)!=m_idMap.end())
     {
         m_idMap.erase(id);
