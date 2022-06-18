@@ -2,6 +2,8 @@
 
 class SingleChatMessageJsonData :public JsonBaseData
 {
+public:
+
     SingleChatMessageJsonData(const std::string& message = "");
     void parse(const std::string& message)override;
     std::string generateJson()override;
