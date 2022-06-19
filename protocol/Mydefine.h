@@ -55,10 +55,12 @@ struct MyChatMessageInfo
     std::string m_strFromId{""};
     std::string m_strToId{""};
     std::string m_strChatMsg{""};
-    MyChatMessageInfo(std::string fromId="",std::string toId="",std::string chatMsg="")
+    std::string m_strSendName{""};
+    MyChatMessageInfo(std::string fromId="",std::string toId="",std::string chatMsg="",std::string sendName="")
     :m_strFromId(fromId),
     m_strToId(toId),
-    m_strChatMsg(chatMsg)
+    m_strChatMsg(chatMsg),
+    m_strSendName(sendName)
     {}
 };
 

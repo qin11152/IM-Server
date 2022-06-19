@@ -188,11 +188,11 @@ void ChatClient::handleClientMessage(const std::string& message)
     std::stringstream ss(message);
     read_json(ss,pt);
 
-    printf("recv msg:%s\n",message.c_str());
+    //printf("recv msg:%s\n",message.c_str());
 
     //首先获取这次得到的消息的类型
     int imessageType=pt.get<int>("type");
-    //printf("type is::%d\n",imessageType);
+    printf("type is::%d\n",imessageType);
     //根据消息的类型做相应的处理
     switch (imessageType)
     {
@@ -321,6 +321,7 @@ void ChatClient::handleClientMessage(const std::string& message)
                 tmp.m_strMessage=item.m_strChatMsg;
                 tmp.m_strRecvUserId=item.m_strToId;
                 tmp.m_strSendUserId=item.m_strFromId;
+                tmp.m_strSendName=item.m_strSendName;
                 DoWrite(tmp.generateJson(),tmp.generateJson().length());
             }
         }
@@ -342,7 +343,7 @@ void ChatClient::handleClientMessage(const std::string& message)
             else
             {
                 //TODO插入数据库中
-                MysqlQuery::Instance()->insertCachedChatMsg(singleChatData.m_strSendUserId,singleChatData.m_strRecvUserId,singleChatData.m_strMessage);
+                MysqlQuery::Instance()->insertCachedChatMsg(singleChatData.m_strSendUserId,singleChatData.m_strRecvUserId,singleChatData.m_strMessage,singleChatData.m_strSendName,singleChatData.m_strTime);
             }
         }
         break;

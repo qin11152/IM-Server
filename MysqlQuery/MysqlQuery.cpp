@@ -206,7 +206,7 @@ bool MysqlQuery::queryCachedAddFriendInfo(std::vector<MyAddFriendInfo>& vecFried
     printf("query add friend info id=%s\n",id.c_str());
     if(mysql_query(m_mysql,query.c_str()))
     {
-        printf("query add friend info failed,id=%s\n",id);
+        printf("query add friend info failed,id=%s\n",id.c_str());
         return false;
     }
 
@@ -292,19 +292,20 @@ bool MysqlQuery::queryCachedChatMsg(std::vector<MyChatMessageInfo>& vecFriednInf
         tmp.m_strFromId=rowPtr[0];
         tmp.m_strToId=rowPtr[1];
         tmp.m_strChatMsg=rowPtr[2];
+        tmp.m_strSendName=rowPtr[3];
         vecFriednInfo.push_back(tmp);
     }
     mysql_free_result(res);
     return true;
 }
 
-bool MysqlQuery::insertCachedChatMsg(std::string& fromId,std::string& toId,std::string& msg)
+bool MysqlQuery::insertCachedChatMsg(std::string& fromId,std::string& toId,std::string& msg,std::string& sendName,std::string& time)
 {
-    std::string query="insert into chat_message_cache values(\""+fromId+"\",\""+toId+"\",\""+msg+"\")";
+    std::string query="insert into chat_message_cache values(\""+fromId+"\",\""+toId+"\",\""+msg+"\",\""+sendName+"\",\""+time+"\")";
     printf("insert cached msg query is:%s\n",query.c_str());
     if(mysql_query(m_mysql,query.c_str()))
     {
-        printf("insert cached chat info failed,fromid=%s\n",fromId);
+        printf("insert cached chat info failed,fromid=%s\n",fromId.c_str());
         return false;
     }
     return true;
@@ -312,7 +313,7 @@ bool MysqlQuery::insertCachedChatMsg(std::string& fromId,std::string& toId,std::
 
 bool MysqlQuery::deleteCachedChatMsg(std::string& id)
 {
-    std::string query="delete from chat_message_cache values where toId=\""+id+"\"";
+    std::string query="delete from chat_message_cache where toId=\""+id+"\"";
     if(mysql_query(m_mysql,query.c_str()))
     {
         printf("delete cached chat info failed,fromid=%s\n",id.c_str());
@@ -329,7 +330,7 @@ void MysqlQuery::queryUserFrinedList(std::vector<FriendInfo>& vecFriendList,std:
     //printf("%s\n",query.c_str());
     if(mysql_query(m_mysql,query.c_str()))
     {
-        printf("query friend info failed,id=%s\n",strUserId);
+        printf("query friend info failed,id=%s\n",strUserId.c_str());
         return;
     }
     MYSQL_RES* res=nullptr;

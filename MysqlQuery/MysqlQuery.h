@@ -36,7 +36,7 @@ class MysqlQuery
         //从数据库中得到缓存的聊天消息
         bool queryCachedChatMsg(std::vector<MyChatMessageInfo>& vecFriednInfo,std::string& id);
         //把点对点聊天消息缓存起来，好友不在线时用的
-        bool insertCachedChatMsg(std::string& fromId,std::string& toId,std::string& msg);
+        bool insertCachedChatMsg(std::string& fromId,std::string& toId,std::string& msg,std::string& sendName,std::string& time);
         //从数据库中删除缓存的聊天消息
         bool deleteCachedChatMsg(std::string& id);
         //把获取的好友列表信息存储在vector中
