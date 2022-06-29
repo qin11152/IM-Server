@@ -20,7 +20,12 @@ class MysqlQuery
         bool VertifyPassword(int id,const std::string& password);
         int GetCurrentUserCount();
         //像数据库添加好友
-        bool AddFriend(std::string friend_1,std::string friend_2);
+        /*
+        *param friend_1:插入到数据库的id_my
+        *param friend_2：插入到数据库的id_friend
+        *param name：friend对应的的name
+        */
+        bool AddFriend(std::string friend_1,std::string friend_2,std::string friend1name,std::string friend2name);
         //查询用户是否在线
         bool queryUserIsOnline(std::string userId);
         //修改用户在线状态

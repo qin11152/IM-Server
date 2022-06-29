@@ -96,15 +96,15 @@ bool MysqlQuery::VertifyPassword(int id,const std::string& password)
     
 }
 
-bool MysqlQuery::AddFriend(std::string friend_1,std::string friend_2)
+bool MysqlQuery::AddFriend(std::string friend_1,std::string friend_2,std::string friend1name,std::string friend2name)
 {
-    std::string query="insert into friend_info values(\""+friend_1+"\",\""+friend_2+"\")";
+    std::string query="insert into friend_info values(\""+friend_1+"\",\""+friend_2+"\",\""+friend2name+"\")";
     if(mysql_query(m_mysql,query.c_str()))
     {
         printf("insert into friend_info failed\n");
         return false;
     }
-    query="insert into friend_info values("+friend_2+","+friend_1+")";
+    query="insert into friend_info values(\""+friend_2+"\",\""+friend_1+"\",\""+friend1name+"\")";
     if(mysql_query(m_mysql,query.c_str()))
     {
         printf("insert into friend_info failed\n");

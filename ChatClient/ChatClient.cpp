@@ -164,6 +164,7 @@ bool ChatClient::praseJsonString(std::string& message,ptree& pt)
     std::stringstream ss(message);
     //read json type
     read_json(ss,pt);
+    return true;
 }
 
 void ChatClient::removeSelfFromServer()
@@ -243,7 +244,6 @@ void ChatClient::handleClientMessage(const std::string& message)
             //如果同意，双方的好友库里增加好友信息
             if(addFriendResponseData.m_bResult)
             {
-                MysqlQuery::Instance()->AddFriend(addFriendResponseData.m_strFriendId,addFriendResponseData.m_strMyId);
                 //通知双方你们已经是好友了
                 AddFriendNotify addFriendNotifyData;
                 addFriendNotifyData.m_strId1=addFriendResponseData.m_strFriendId;
@@ -259,6 +259,7 @@ void ChatClient::handleClientMessage(const std::string& message)
                 }
                 //通知到自己
                 DoWrite(sendStr,sendStr.length());
+                MysqlQuery::Instance()->AddFriend(addFriendResponseData.m_strFriendId,addFriendResponseData.m_strMyId,addFriendNotifyData.m_strName1,addFriendNotifyData.m_strName2);
             }
             return;
         }
