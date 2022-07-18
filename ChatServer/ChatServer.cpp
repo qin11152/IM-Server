@@ -1,5 +1,5 @@
 #include "ChatServer.h"
-#include <iostream>
+#include "Log.h"
 
 ChatServer::ChatServer(io_context& io_ctx,short port)
 :m_ioc(io_ctx),
@@ -30,12 +30,10 @@ void ChatServer::removeDisconnetedClient(int id,std::shared_ptr<ChatClient> ptr)
     {
         m_idMap.erase(id);
     }
-    //printf("m_idmap size is:%d\n",m_idMap.size());
     for(auto iter=m_socketVec.begin();iter!=m_socketVec.end();++iter)
     {
         if(*iter==ptr)
         {
-            //std::cout<<(*iter).use_count()<<std::endl;
             m_socketVec.erase(iter);
             return;
         }
@@ -44,9 +42,7 @@ void ChatServer::removeDisconnetedClient(int id,std::shared_ptr<ChatClient> ptr)
 
 void ChatServer::insertIntoIdMap(int id,std::shared_ptr<ChatClient> m_clientPtr)
 {
-    printf("client id:%d\n",id);
     m_idMap[id]=m_clientPtr;
-    //printf("size is:%d\n",m_idMap.size());
 }
 
 bool ChatServer::transferMessage(int id,std::string& message)
@@ -54,6 +50,10 @@ bool ChatServer::transferMessage(int id,std::string& message)
     if(m_idMap.find(id)!=m_idMap.end())
     {
         m_idMap[id]->DoWrite(message,message.length());
+    }
+    else 
+    {
+        _LOG(Logcxx::ERROR,"when transfer message couldn't find id,id:%d",id);
     }
     return true;
 }
