@@ -8,6 +8,7 @@ include_directories("${PROJECT_SOURCE_DIR}/MysqlQuery")
 include_directories("${PROJECT_SOURCE_DIR}/ChatServer")
 include_directories("${PROJECT_SOURCE_DIR}/ChatClient")
 include_directories("${PROJECT_SOURCE_DIR}/protocol")
+include_directories("${PROJECT_SOURCE_DIR}/module")
 
 
 
@@ -15,6 +16,7 @@ add_subdirectory(MysqlQuery)
 add_subdirectory(ChatClient)
 add_subdirectory(ChatServer)
 add_subdirectory(protocol)
+add_subdirectory(module)
 
 add_executable(qin main.cpp)
 
@@ -22,6 +24,7 @@ TARGET_LINK_LIBRARIES(qin MysqlQueryLib)
 TARGET_LINK_LIBRARIES(qin ChatServerLib)
 TARGET_LINK_LIBRARIES(qin ChatClientLib)
 TARGET_LINK_LIBRARIES(qin ProtocolLib)
-target_link_libraries(qin  libmysqlclient.so)
+target_link_libraries(qin libmysqlclient.so)
+target_link_libraries(qin LogLib)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")

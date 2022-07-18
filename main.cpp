@@ -18,7 +18,6 @@ int main(int argc,char* argv[])
         return 1;
     }
     Logcxx::get_mutable_instance().Init("./log4cxx.properties");
-    _LOG(Logcxx::ERROR, "%d, %s", 11,"sdass");
     boost::asio::io_context io;
     unsigned short port=std::atoi(argv[1]);
     ChatServer server(io,port);

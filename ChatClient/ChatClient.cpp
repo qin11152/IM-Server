@@ -9,6 +9,7 @@
 #include "AddFriendResponseJsonData.h"
 #include "AddFriendRequestJsonData.h"
 #include "AddFriendNotifyJsonData.h"
+#include "Log.h"
 
 constexpr int kHeartPackageTime=300;
 //初始化的时候会把socket move过来，会保存服务器的指针，会定时5分钟的心跳保活
@@ -30,7 +31,6 @@ ChatClient::~ChatClient()
     m_clientSocket.cancel();
     m_clientSocket.close();
     //TODO修改这个client对应id的状态
-    printf("ChatClient des\n");
 }
 
 void ChatClient::Start()
@@ -41,7 +41,6 @@ void ChatClient::Start()
 
 void ChatClient::DoWrite(const std::string& message,int length)
 {
-    printf("write message is: %s\n",message.c_str());
     std::string msgLength=std::to_string(length);
     if(msgLength.length()<PackageHeadSize)
     {
@@ -50,7 +49,6 @@ void ChatClient::DoWrite(const std::string& message,int length)
     }
     msgLength=msgLength+message;
     int cnt=boost::asio::write(m_clientSocket,boost::asio::buffer(msgLength.c_str(),length+PackageHeadSize));
-    //printf("send %d byte\n",cnt);
     //auto self=shared_from_this();
     /*LengthInfo l(length);
     char lengthbuffer[sizeof(LengthInfo)+length]{ 0 };
@@ -94,7 +92,6 @@ void ChatClient::DoRead()
                 {
                     //会把从网络传递来的数据从小缓冲区存在一个大缓冲区中，在大缓冲区中进行业务处理
                     memcpy(m_cBuffer+m_endPosOfBuffer,m_oneBuffer,length);
-                    //printf("message length: %d,message is:%s\n",length,m_cBuffer);
                     //每次存储到大缓冲区后都要更新他的尾部标识
                     m_endPosOfBuffer+=length;
 
@@ -114,7 +111,6 @@ void ChatClient::DoRead()
                     memcpy(lengthBuf,m_cBuffer,PackageHeadSize);
                     //得到数据包的长度
                     int lengthOfMessage=atoi(lengthBuf);
-                    //printf("package length is%d\n",lengthOfMessage);
                     //进行第一次业务处理,查看是收到的数据是否大于包头指示的长度
                     //大于的时候就处理，小于就去继续读
                     if(m_endPosOfBuffer>=lengthOfMessage+PackageHeadSize)
@@ -123,7 +119,6 @@ void ChatClient::DoRead()
                         char message[lengthOfMessage+1]{0};
                         memcpy(message,m_cBuffer+PackageHeadSize,lengthOfMessage);
                         std::string test(message);
-                        //printf("%s\n",test.c_str());
                         //因已取出一部分信息，要把大缓冲区的内容更新一下
                         memcpy(m_cBuffer,m_cBuffer+lengthOfMessage+PackageHeadSize,BUFFERLENGTH-lengthOfMessage-PackageHeadSize);
                         //尾部标识也更新一下
@@ -149,7 +144,6 @@ void ChatClient::DoRead()
                         m_clientSocket.cancel();
                         auto self=shared_from_this();
                         m_bReadCancel=true;
-                        printf("disconnect\n");
                         m_ptrChatServer->removeDisconnetedClient(m_iId,self);
                     }
                     return;
@@ -167,9 +161,9 @@ bool ChatClient::praseJsonString(std::string& message,ptree& pt)
     return true;
 }
 
+//从服务器移除某个连接上的用户
 void ChatClient::removeSelfFromServer()
 {
-    //printf("timeout\n");
     if(m_cancel)
     {
         m_cancel=false;
@@ -181,19 +175,19 @@ void ChatClient::removeSelfFromServer()
     m_ptrChatServer->removeDisconnetedClient(m_iId,self);
 }
 
+//处理客户端发送来的消息
 void ChatClient::handleClientMessage(const std::string& message)
 {
     //传递的消息类型为json格式
     //同ptree来解析
+    _LOG(Logcxx::INFO,"enter handle clientMessage: %s",message.c_str());
     ptree pt;
     std::stringstream ss(message);
     read_json(ss,pt);
 
-    //printf("recv msg:%s\n",message.c_str());
-
     //首先获取这次得到的消息的类型
     int imessageType=pt.get<int>("type");
-    printf("type is::%d\n",imessageType);
+    _LOG(Logcxx::INFO,"enter handle clientMessage and handle finish type is:%d",imessageType);
     //根据消息的类型做相应的处理
     switch (imessageType)
     {
@@ -230,7 +224,6 @@ void ChatClient::handleClientMessage(const std::string& message)
                 }
                 else
                 {
-                    printf("not online\n");
                     //存储在数据库中，上线后推送
                     MysqlQuery::Instance()->insertAddFriendCache(addFriendRequestData.m_strMyId,addFriendRequestData.m_strFriendId,addFriendRequestData.m_strVerifyMsg);
                 }
@@ -334,7 +327,6 @@ void ChatClient::handleClientMessage(const std::string& message)
             //std::string recvId=pt.get<std::string>("RecvUserId");
             //获取一下要接受消息的人的在线状态
             bool onlineState=MysqlQuery::Instance()->queryUserIsOnline(singleChatData.m_strRecvUserId);
-            //printf("single\n");
             //如果在线，就转发
             if(onlineState)
             {
