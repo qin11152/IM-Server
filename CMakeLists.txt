@@ -24,7 +24,7 @@ TARGET_LINK_LIBRARIES(qin MysqlQueryLib)
 TARGET_LINK_LIBRARIES(qin ChatServerLib)
 TARGET_LINK_LIBRARIES(qin ChatClientLib)
 TARGET_LINK_LIBRARIES(qin ProtocolLib)
-target_link_libraries(qin libmysqlclient.so)
+target_link_libraries(qin libmysqlclient.so boost_thread)
 target_link_libraries(qin LogLib)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")

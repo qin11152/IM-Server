@@ -11,7 +11,8 @@ m_acceptor(io_ctx,tcp::endpoint(tcp::v4(),port))
 void ChatServer::DoAccept()
 {
     m_acceptor.async_accept(
-        [this](std::error_code ec,tcp::socket socket){
+        [this](std::error_code ec,tcp::socket socket)
+        {
             if(!ec)
             {
                 auto new_Acceptor=std::make_shared<ChatClient>(std::move(socket),this,m_ioc);
