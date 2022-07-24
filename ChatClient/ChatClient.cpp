@@ -41,6 +41,7 @@ void ChatClient::Start()
 
 void ChatClient::DoWrite(const std::string& message,int length)
 {
+    //printf("write message:%s\n",message.c_str());
     std::string msgLength=std::to_string(length);
     if(msgLength.length()<PackageHeadSize)
     {
@@ -178,16 +179,17 @@ void ChatClient::removeSelfFromServer()
 //处理客户端发送来的消息
 void ChatClient::handleClientMessage(const std::string& message)
 {
+    //printf("recv message:%s\n",message.c_str());
     //传递的消息类型为json格式
     //同ptree来解析
-    _LOG(Logcxx::INFO,"enter handle clientMessage: %s",message.c_str());
+    //_LOG(Logcxx::INFO,"enter handle clientMessage: %s",message.c_str());
     ptree pt;
     std::stringstream ss(message);
     read_json(ss,pt);
 
     //首先获取这次得到的消息的类型
     int imessageType=pt.get<int>("type");
-    _LOG(Logcxx::INFO,"enter handle clientMessage and handle finish type is:%d",imessageType);
+    //_LOG(Logcxx::INFO,"enter handle clientMessage and handle finish type is:%d",imessageType);
     //根据消息的类型做相应的处理
     switch (imessageType)
     {
@@ -296,7 +298,10 @@ void ChatClient::handleClientMessage(const std::string& message)
             //TODO推送缓存的聊天消息和添加好友请求
             std::vector<MyAddFriendInfo> vecCachedAddFriend;
             MysqlQuery::Instance()->queryCachedAddFriendInfo(vecCachedAddFriend,userId);
-            MysqlQuery::Instance()->deleteCachedAddFriendInfo(userId);
+            if(vecCachedAddFriend.size()>0)
+            {
+                MysqlQuery::Instance()->deleteCachedAddFriendInfo(userId);
+            }
             for(auto& item:vecCachedAddFriend)
             {
                 AddFriendRequestJsonData tmp;
@@ -308,7 +313,10 @@ void ChatClient::handleClientMessage(const std::string& message)
             }
             std::vector<MyChatMessageInfo> vecCachedChatInfo;
             MysqlQuery::Instance()->queryCachedChatMsg(vecCachedChatInfo,userId);
-            MysqlQuery::Instance()->deleteCachedChatMsg(userId);
+            if(vecCachedChatInfo.size()>0)
+            {
+                MysqlQuery::Instance()->deleteCachedChatMsg(userId);
+            }
             for(auto & item:vecCachedChatInfo)
             {
                 SingleChatMessageJsonData tmp;

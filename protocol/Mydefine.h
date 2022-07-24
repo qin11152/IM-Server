@@ -12,7 +12,7 @@ constexpr int PackageHeadSize=8;
 
 enum class MessageType
 {
-    Default,
+Default,
     RegisterRequest,
     RegisterResponse,
     LoginRequest,
@@ -26,6 +26,8 @@ enum class MessageType
     HeartPackage,
     FriendListRequest,
     FriendListResponse,
+    RefreshFriendListRequest,
+    RefreshFriendListResponse,
     GetFriendList,
     GetFriendListReply
 };

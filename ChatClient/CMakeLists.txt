@@ -8,3 +8,4 @@ ADD_LIBRARY (ChatClientLib ${DIR_TEST1_SRCS})
 
 TARGET_LINK_LIBRARIES(ChatClientLib MysqlQueryLib)
 TARGET_LINK_LIBRARIES(ChatClientLib ProtocolLib)
+TARGET_LINK_LIBRARIES(ChatClientLib log4cxx)

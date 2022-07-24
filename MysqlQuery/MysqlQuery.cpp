@@ -149,7 +149,6 @@ bool MysqlQuery::updateUserOnlineState(std::string userId,bool onlineState)
 {
     std::string strOnlineState=onlineState?"1":"0";
     std::string query="update user_info set online="+strOnlineState+" where id="+userId;
-    printf("update query is %s\n",query.c_str());
     if(mysql_query(m_mysql,query.c_str()))
     {
         _LOG(Logcxx::ERROR,"update user_info set online failed,query is:%s",query.c_str());
