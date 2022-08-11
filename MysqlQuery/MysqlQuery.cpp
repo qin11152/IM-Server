@@ -390,6 +390,46 @@ std::string MysqlQuery::queryUserNameAcordId(const std::string& id)
     return name;
 }
 
+bool MysqlQuery::inserImagePathAcordId(const std::string& id,const std::string strIamge)
+{
+   std::string query="update user_info set image=\'"+strIamge+"\' where id="+id; 
+   if(mysql_query(m_mysql,query.c_str()))
+    {
+        _LOG(Logcxx::ERROR,"update user image failed,query is:%s",query.c_str());
+        return false;
+    }
+    return true;
+}
+
+std::string MysqlQuery::queryImagePathAcordId(const std::string& id)
+{
+    std::string query="select image from user_info where id="+id;
+    if(mysql_query(m_mysql,query.c_str()))
+    {
+        _LOG(Logcxx::ERROR,"select image from user_info failed,query is:%s",query.c_str());
+        return "";
+    }
+    std::string image="";
+    MYSQL_RES* res=nullptr;
+    //将查询的结果存储在res中
+    res=mysql_store_result(m_mysql);
+    //获取结果中的行数
+    int rowCount=mysql_num_rows(res);
+
+    //获取行
+    MYSQL_ROW rowPtr=nullptr;
+    //有就一直获取
+    while(rowPtr=mysql_fetch_row(res))
+    {
+        //可以通过循环获取每一行的内容，每一行中
+        //列的名称在上边已经进行了获取
+        //这里只有一行一列
+        image=rowPtr[0];
+    }
+    mysql_free_result(res);
+    return image;
+}
+
 MysqlQuery::~MysqlQuery(){
     mysql_close(m_mysql);
 }

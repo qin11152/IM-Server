@@ -18,7 +18,7 @@ add_subdirectory(ChatServer)
 add_subdirectory(protocol)
 add_subdirectory(module)
 
-add_executable(qin main.cpp)
+add_executable(qin ${DIR_SRCS})
 
 TARGET_LINK_LIBRARIES(qin MysqlQueryLib)
 TARGET_LINK_LIBRARIES(qin ChatServerLib)

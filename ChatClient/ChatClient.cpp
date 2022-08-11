@@ -295,6 +295,11 @@ void ChatClient::handleClientMessage(const std::string& message)
             m_iId=atoi(userId.c_str());
             m_ptrChatServer->insertIntoIdMap(atoi(userId.c_str()),shared_from_this());
             MysqlQuery::Instance()->updateUserOnlineState(userId,true);
+            //查询表获取好友列表，并发送
+            GetFriendListReplyData getFriendListReplyData;
+            MysqlQuery::Instance()->queryUserFrinedList(getFriendListReplyData.m_vecFriendList,userId);
+            auto sendStr=getFriendListReplyData.generateJson();
+            DoWrite(sendStr,getFriendListReplyData.generateJson().length());
             //TODO推送缓存的聊天消息和添加好友请求
             std::vector<MyAddFriendInfo> vecCachedAddFriend;
             MysqlQuery::Instance()->queryCachedAddFriendInfo(vecCachedAddFriend,userId);

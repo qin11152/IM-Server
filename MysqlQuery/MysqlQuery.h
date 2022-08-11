@@ -48,7 +48,10 @@ class MysqlQuery
         void queryUserFrinedList(std::vector<FriendInfo>& vecFriendList,std::string& strUserId);
         //根据id查找名称
         std::string queryUserNameAcordId(const std::string &id);
-
+        //根据id插入图片到数据库中
+        bool inserImagePathAcordId(const std::string& id,const std::string strIamge);
+        //获取头像图片的路径
+        std::string queryImagePathAcordId(const std::string& id);
 
     private:
         MysqlQuery(const char* ip,const char* database,const char* user,const char*password);
