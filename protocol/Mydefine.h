@@ -29,7 +29,8 @@ Default,
     RefreshFriendListRequest,
     RefreshFriendListResponse,
     GetFriendList,
-    GetFriendListReply
+    GetFriendListReply,
+    ProfileImageMsg,
 };
 
 struct LengthInfo

@@ -1,6 +1,7 @@
 #include "ChatServer/ChatServer.h"
 #include "MysqlQuery.h"
 #include "Log.h"
+#include "PublicFunction.hpp"
 #include <boost/thread/thread.hpp>
 #include <boost/bind.hpp>
 #include <thread>

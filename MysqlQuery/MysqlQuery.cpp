@@ -7,7 +7,7 @@ std::shared_ptr<MysqlQuery> MysqlQuery::m_ptrInstance={nullptr};
 const char* kIp="127.0.0.1";
 const char* kDataBase="chat_data";
 const char* kUser="root";
-const char* kPassword="root";
+const char* kPassword="qinbiao9704";
 
 std::shared_ptr<MysqlQuery> MysqlQuery::Instance()
 {

@@ -3,16 +3,18 @@
 #include <boost/asio.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
-#include<memory>
-#include<mutex>
-#include<type_traits>
-#include"MysqlQuery.h"
+#include <memory>
+#include <mutex>
+#include <unordered_map>
+#include <type_traits>
+#include "MysqlQuery.h"
 
 using namespace boost::property_tree;
 
 class ChatServer;
 
 constexpr int BUFFERLENGTH=10*1024;
+constexpr int FIRSTBUFFERLENGTH=1024;
 
 using namespace boost::asio;
 using namespace boost::asio::ip;
@@ -32,7 +34,10 @@ private:
     bool m_cancel{false};           //表示定时器任务是否被取消了
     bool m_bReadCancel{false};
     size_t m_endPosOfBuffer{0};
-    char m_oneBuffer[1024]{0};
+    char m_oneBuffer[FIRSTBUFFERLENGTH]{0};
+
+    std::unordered_map<std::string,std::string> m_mapImageUUIDAndBase64;
+    std::unordered_map<std::string,int> m_mapImageUUIDAndSegment;
 
     //服务器指针，用来对服务器中的map操作
     ChatServer* m_ptrChatServer{nullptr};

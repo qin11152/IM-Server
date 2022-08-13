@@ -1,7 +1,7 @@
 #include <string>
 #include <unistd.h>
 
-std::string getCurrentDir()
+inline std::string getCurrentDir()
 {
     char buf[128]{0};
     getcwd(buf,sizeof(buf));

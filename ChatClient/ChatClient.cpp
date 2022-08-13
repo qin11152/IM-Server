@@ -9,7 +9,10 @@
 #include "AddFriendResponseJsonData.h"
 #include "AddFriendRequestJsonData.h"
 #include "AddFriendNotifyJsonData.h"
+#include "ProfileImageMsgJsonData.h"
+#include "../PublicFunction.hpp"
 #include "Log.h"
+#include <fstream>
 
 constexpr int kHeartPackageTime=300;
 //初始化的时候会把socket move过来，会保存服务器的指针，会定时5分钟的心跳保活
@@ -77,11 +80,11 @@ void ChatClient::DoRead()
     //读取错误的信息
     boost::system::error_code ec;
     //首先清空读缓冲区
-    memset(m_oneBuffer,0,1024);
+    memset(m_oneBuffer,0,FIRSTBUFFERLENGTH);
     //开启异步读任务，传递buffer和回调函数，这里用的lambda表达式
     m_clientSocket.async_read_some
     (
-        boost::asio::buffer(m_oneBuffer,1024),
+        boost::asio::buffer(m_oneBuffer,FIRSTBUFFERLENGTH),
         [this,self](std::error_code ec,size_t length)
         {
             if(m_bReadCancel==true)
@@ -100,7 +103,7 @@ void ChatClient::DoRead()
                     if(m_endPosOfBuffer<PackageHeadSize)
                     {
                         //清空一下从底层接受消息的缓冲区
-                        memset(m_oneBuffer,0,1024);
+                        memset(m_oneBuffer,0,FIRSTBUFFERLENGTH);
                         //然后继续读取
                         DoRead();
                     }
@@ -364,6 +367,38 @@ void ChatClient::handleClientMessage(const std::string& message)
             DoWrite(sendStr,getFriendListReplyData.generateJson().length());
         }
         break;
+    case static_cast<int>(MessageType::ProfileImageMsg):
+        {
+            _LOG(Logcxx::Level::INFO,"收到了头像信息");
+            ProfileImageMsgJsonData profileImageMsgData(message);
+            int iNeedSegment=profileImageMsgData.m_iSumIndex;
+            if(m_mapImageUUIDAndSegment.count(profileImageMsgData.m_strUUID)&&profileImageMsgData.m_iCurIndex-1 != m_mapImageUUIDAndSegment[profileImageMsgData.m_strUUID])
+            {
+                //TODO 回复一个uuid发送失败的消息
+            }
+            m_mapImageUUIDAndBase64[profileImageMsgData.m_strUUID]+=profileImageMsgData.m_strBase64Msg;
+            if(profileImageMsgData.m_iCurIndex==profileImageMsgData.m_iSumIndex)
+            {
+                //如果收到的片数到达了最后一个了
+                //TODO 将图片保存到本地，并将图片的路径保存到数据库中
+                _LOG(Logcxx::Level::INFO,"收到了final头像信息");
+                std::string curPath=getCurrentDir();
+                curPath+="/data/profileImage/"+profileImageMsgData.m_strImageName;
+                std::fstream out(curPath,std::ios::out);
+                if(out.is_open())
+                {
+                    out<<m_mapImageUUIDAndBase64[profileImageMsgData.m_strUUID];
+                    out.close();
+                }
+                else{
+                    _LOG(Logcxx::Level::ERROR,"保存头像时，打开文件失败");
+                }
+                m_mapImageUUIDAndBase64.erase(profileImageMsgData.m_strUUID);
+                m_mapImageUUIDAndSegment.erase(profileImageMsgData.m_strUUID);
+                //TODO 回复一个发送成功的消息
+            }
+            m_mapImageUUIDAndSegment[profileImageMsgData.m_strUUID]=profileImageMsgData.m_iCurIndex;
+        }
     default:
         break;
     }
