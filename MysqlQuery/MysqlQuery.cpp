@@ -1,5 +1,6 @@
 #include "MysqlQuery.h"
 #include "Log.h"
+#include "../PublicFunction.hpp"
 
 std::mutex MysqlQuery::m_mutex;
 std::shared_ptr<MysqlQuery> MysqlQuery::m_ptrInstance={nullptr};
@@ -60,10 +61,15 @@ int MysqlQuery::GetCurrentUserCount()
 int MysqlQuery::InsertNewUser(const std::string name,const std::string&password,
                             const std::string iconUrl,const std::string& signature)
 {
+    //std::string exePahth=getCurrentDir();
+    //刚开始时默认头像就是设定的那个图片
+    std::string profileImagePath="./data/profileImage/DefaultImageBase64.txt";
+    //获取当前时间转换为字符串
+    std::string time=getCurrentTime();
     int id=GetCurrentUserCount()+1;
-    std::string query="insert into user_info (id,password,name,signature,icon) values("
+    std::string query="insert into user_info (id,password,name,signature,icon,online,image,imagetimestamp) values("
     +std::to_string(id)+",\""+password+"\",\""+name+"\",\""+signature+
-    "\",\""+iconUrl+"\");";
+    "\",\""+iconUrl+"\",false,\""+profileImagePath+"\",\""+time+"\");";
     if(mysql_query(m_mysql,query.c_str()))
     {
         _LOG(Logcxx::ERROR,"insert into user_info failed,query is:%s",query.c_str());
@@ -390,9 +396,10 @@ std::string MysqlQuery::queryUserNameAcordId(const std::string& id)
     return name;
 }
 
-bool MysqlQuery::inserImagePathAcordId(const std::string& id,const std::string strIamge)
+bool MysqlQuery::updateImagePathAcordId(const std::string& id,const std::string strIamgePath)
 {
-   std::string query="update user_info set image=\'"+strIamge+"\' where id="+id; 
+    std::string curTime=getCurrentTime();
+   std::string query="update user_info set image=\'"+strIamgePath+"\', imagetimestamp=\'"+curTime+"\' where id="+id; 
    if(mysql_query(m_mysql,query.c_str()))
     {
         _LOG(Logcxx::ERROR,"update user image failed,query is:%s",query.c_str());

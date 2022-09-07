@@ -14,6 +14,8 @@
 #include "Log.h"
 #include <fstream>
 
+using namespace boost;
+
 constexpr int kHeartPackageTime=300;
 //初始化的时候会把socket move过来，会保存服务器的指针，会定时5分钟的心跳保活
 ChatClient::ChatClient(tcp::socket sock,ChatServer* ptr,boost::asio::io_context& ioc)
@@ -21,11 +23,27 @@ ChatClient::ChatClient(tcp::socket sock,ChatServer* ptr,boost::asio::io_context&
 m_ptrChatServer(ptr),
 m_timer(ioc,boost::posix_time::seconds(kHeartPackageTime))
 { 
-    m_timer.async_wait(std::bind(&ChatClient::removeSelfFromServer,this));
+    //m_timer.async_wait(std::bind(&ChatClient::removeSelfFromServer,this));
+    m_timer.async_wait
+    (
+        [this](const std::error_code& ec)
+        {
+            printf("error code is:%d\n",ec.value());
+            if(0!=ec.value())
+            {
+                return;
+            }
+            m_clientSocket.cancel();
+            auto self=shared_from_this();
+            m_bReadCancel=true;
+            m_ptrChatServer->removeDisconnetedClient(m_iId,self);
+        }
+    );
 }
 
 ChatClient::~ChatClient()
 {
+    printf("des\n");
     m_cancel=true;
     m_timer.cancel();
     //运行状态标志位false，因为测试发现析构后定时器回调函数还会执行，待改进
@@ -165,6 +183,7 @@ bool ChatClient::praseJsonString(std::string& message,ptree& pt)
     return true;
 }
 
+#if 0
 //从服务器移除某个连接上的用户
 void ChatClient::removeSelfFromServer()
 {
@@ -178,10 +197,33 @@ void ChatClient::removeSelfFromServer()
     m_bReadCancel=true;
     m_ptrChatServer->removeDisconnetedClient(m_iId,self);
 }
+#endif
 
 //处理客户端发送来的消息
 void ChatClient::handleClientMessage(const std::string& message)
 {
+    //收到任意消息，都把定时器更新一下
+    /*m_cancel=true;
+    m_timer.cancel();
+    m_timer.expires_at(m_timer.expires_at()+boost::posix_time::seconds(kHeartPackageTime)-m_timer.expires_from_now());
+    m_timer.async_wait(std::bind(&ChatClient::removeSelfFromServer,this));*/
+    m_timer.cancel();
+    m_timer.expires_at(m_timer.expires_at()+boost::posix_time::seconds(kHeartPackageTime)-m_timer.expires_from_now());
+    m_timer.async_wait
+    (
+        [this](const std::error_code& ec)
+        {
+            printf("error code is:%d\n",ec.value());
+            if(0!=ec.value())
+            {
+                return;
+            }
+            m_clientSocket.cancel();
+            auto self=shared_from_this();
+            m_bReadCancel=true;
+            m_ptrChatServer->removeDisconnetedClient(m_iId,self);
+        }
+    );
     //printf("recv message:%s\n",message.c_str());
     //传递的消息类型为json格式
     //同ptree来解析
@@ -283,11 +325,6 @@ void ChatClient::handleClientMessage(const std::string& message)
     //客户端发来的心跳包
     case static_cast<int>(MessageType::HeartPackage):
         {
-            //TODO回复心跳包,现在暂时不回复，收到了只是把标志位改一下
-            m_timer.cancel();
-            m_cancel=true;
-            m_timer.expires_at(m_timer.expires_at()+boost::posix_time::seconds(kHeartPackageTime)-m_timer.expires_from_now());
-            m_timer.async_wait(std::bind(&ChatClient::removeSelfFromServer,this));
         }
         break;
     //用户第一次登录上发来的初始化消息
@@ -369,19 +406,19 @@ void ChatClient::handleClientMessage(const std::string& message)
         break;
     case static_cast<int>(MessageType::ProfileImageMsg):
         {
-            _LOG(Logcxx::Level::INFO,"收到了头像信息");
             ProfileImageMsgJsonData profileImageMsgData(message);
             int iNeedSegment=profileImageMsgData.m_iSumIndex;
             if(m_mapImageUUIDAndSegment.count(profileImageMsgData.m_strUUID)&&profileImageMsgData.m_iCurIndex-1 != m_mapImageUUIDAndSegment[profileImageMsgData.m_strUUID])
             {
                 //TODO 回复一个uuid发送失败的消息
+                m_mapImageUUIDAndBase64.erase(profileImageMsgData.m_strUUID);
+                m_mapImageUUIDAndSegment.erase(profileImageMsgData.m_strUUID);
             }
             m_mapImageUUIDAndBase64[profileImageMsgData.m_strUUID]+=profileImageMsgData.m_strBase64Msg;
             if(profileImageMsgData.m_iCurIndex==profileImageMsgData.m_iSumIndex)
             {
                 //如果收到的片数到达了最后一个了
                 //TODO 将图片保存到本地，并将图片的路径保存到数据库中
-                _LOG(Logcxx::Level::INFO,"收到了final头像信息");
                 std::string curPath=getCurrentDir();
                 curPath+="/data/profileImage/"+profileImageMsgData.m_strImageName;
                 std::fstream out(curPath,std::ios::out);
@@ -393,6 +430,7 @@ void ChatClient::handleClientMessage(const std::string& message)
                 else{
                     _LOG(Logcxx::Level::ERROR,"保存头像时，打开文件失败");
                 }
+                MysqlQuery::Instance()->updateImagePathAcordId(profileImageMsgData.m_strId,curPath);
                 m_mapImageUUIDAndBase64.erase(profileImageMsgData.m_strUUID);
                 m_mapImageUUIDAndSegment.erase(profileImageMsgData.m_strUUID);
                 //TODO 回复一个发送成功的消息
