@@ -1,3 +1,11 @@
+/*
+ * @Author: qin11152 1052080761@qq.com
+ * @Date: 2022-06-18 13:57:30
+ * @LastEditors: qin11152 1052080761@qq.com
+ * @LastEditTime: 2022-09-07 22:01:43
+ * @FilePath: /src/IM-Server/protocol/GetFriendListReplyData.cpp
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 #include "GetFriendListReplyData.h"
 
 GetFriendListReplyData::GetFriendListReplyData(const std::string& message)
@@ -45,17 +53,32 @@ std::string GetFriendListReplyData::generateJson()
     ptree m_ptree,m_friendIdList,m_friendNameList;
     m_ptree.put("type",static_cast<int>(m_strType));
 
+    int cnt=0;
+    ptree ListNode;
     for(auto &item:m_vecFriendList)
     {
+        cnt++;
+#if 0
         ptree child1;
         child1.put("",item.m_strFriendId);
         m_friendIdList.push_back(std::make_pair("",child1));
         ptree child2;
         child2.put("",item.m_strFriendName);
         m_friendNameList.push_back(std::make_pair("",child2));
+#endif
+        ptree tmpNode;
+        tmpNode.put("id",item.m_strFriendId);
+        tmpNode.put("name",item.m_strFriendName);
+        tmpNode.put("imageTimeStamp",item.m_strImageTimeStamp);
+        ListNode.push_back(std::make_pair("",tmpNode));
     }
+
+    m_ptree.add_child("friendInfoList",ListNode);
+
+#if 0
     m_ptree.add_child("FriendIdList",m_friendIdList);
     m_ptree.add_child("FriendNameList",m_friendNameList);
+#endif
 
     std::stringstream sstream;
     write_json(sstream,m_ptree);

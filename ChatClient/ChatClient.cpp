@@ -28,7 +28,7 @@ m_timer(ioc,boost::posix_time::seconds(kHeartPackageTime))
     (
         [this](const std::error_code& ec)
         {
-            printf("error code is:%d\n",ec.value());
+            //printf("error code is:%d\n",ec.value());
             if(0!=ec.value())
             {
                 return;
@@ -213,7 +213,7 @@ void ChatClient::handleClientMessage(const std::string& message)
     (
         [this](const std::error_code& ec)
         {
-            printf("error code is:%d\n",ec.value());
+            //printf("error code is:%d\n",ec.value());
             if(0!=ec.value())
             {
                 return;
@@ -224,7 +224,7 @@ void ChatClient::handleClientMessage(const std::string& message)
             m_ptrChatServer->removeDisconnetedClient(m_iId,self);
         }
     );
-    //printf("recv message:%s\n",message.c_str());
+    printf("recv message:%s\n",message.c_str());
     //传递的消息类型为json格式
     //同ptree来解析
     //_LOG(Logcxx::INFO,"enter handle clientMessage: %s",message.c_str());

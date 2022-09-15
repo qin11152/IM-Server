@@ -2,7 +2,7 @@
  * @Author: qin11152 1052080761@qq.com
  * @Date: 2022-06-18 13:57:30
  * @LastEditors: qin11152 1052080761@qq.com
- * @LastEditTime: 2022-08-21 14:28:17
+ * @LastEditTime: 2022-09-07 21:47:46
  * @FilePath: /src/IM-Server/protocol/Mydefine.h
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -14,7 +14,6 @@ class FriendInfo
 public:
     std::string m_strFriendId{""};      //好友的id
     std::string m_strFriendName{""};     //好友的昵称
-    std::string m_strImagePath{""};      //好友的头像路径
     std::string m_strImageTimeStamp{""};    //好友的头像时间戳
 };
 

@@ -325,10 +325,9 @@ bool MysqlQuery::deleteCachedChatMsg(std::string& id)
 
 void MysqlQuery::queryUserFrinedList(std::vector<FriendInfo>& vecFriendList,std::string& strUserId)
 {
-    //printf("friend list user id:%s\n",strUserId.c_str());
-    //std::string query="select id_friend,name from friend_info where id_my="+strUserId;
-    std::string query="select id_friend, name from friend_info where id_my=\""+strUserId+"\" order by CONVERT( name USING gbk) COLLATE gbk_chinese_ci ASC";
+    //std::string query="select id_friend, name from friend_info where id_my=\""+strUserId+"\" order by CONVERT( name USING gbk) COLLATE gbk_chinese_ci ASC";
     //printf("%s\n",query.c_str());
+    std::string query="SELECT a.id_my, a.name, b.imagetimestamp from friend_info as a inner JOIN user_info as b on (a.id_my=b.id and a.id_my=\""+strUserId+"\") order by CONVERT( a.`name` USING gbk) COLLATE gbk_chinese_ci DESC;";
     if(mysql_query(m_mysql,query.c_str()))
     {
         _LOG(Logcxx::ERROR,"select id_friend, name from friend_info failed,query is:%s",query.c_str());
@@ -361,6 +360,7 @@ void MysqlQuery::queryUserFrinedList(std::vector<FriendInfo>& vecFriendList,std:
         FriendInfo tmp;
         tmp.m_strFriendId=rowPtr[0];
         tmp.m_strFriendName=rowPtr[1];
+        tmp.m_strImageTimeStamp=rowPtr[2];
         vecFriendList.push_back(tmp);
     }
     mysql_free_result(res);
