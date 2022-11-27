@@ -2,7 +2,7 @@
  * @Author: qin11152 1052080761@qq.com
  * @Date: 2022-06-18 13:57:30
  * @LastEditors: qin11152 1052080761@qq.com
- * @LastEditTime: 2022-11-27 13:15:27
+ * @LastEditTime: 2022-11-27 15:05:22
  * @FilePath: /src/IM-Server/MysqlQuery/MysqlQuery.h
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -26,9 +26,15 @@ class MysqlQuery
         //将新注册的用户插入数据库中
         int InsertNewUser(const std::string name,const std::string&password,
                             const std::string iconUrl,const std::string& signature="");
+        /**
+         * @description: 验证用户名和密码是否正确
+         * @param {std::string} name
+         * @param {std::string} password
+         * @return {*}
+         */
         bool VertifyPassword(int id,const std::string& password);
         int GetCurrentUserCount();
-        //像数据库添加好友
+        //向数据库添加好友
         /*
         *param friend_1:插入到数据库的id_my
         *param friend_2：插入到数据库的id_friend
@@ -61,6 +67,11 @@ class MysqlQuery
         bool updateImagePathAcordId(const std::string& id,const std::string strIamgePath,const std::string& timeStamp);
         //获取头像图片的路径
         std::string queryImagePathAcordId(const std::string& id);
+        /**
+         * @brief 根据id获取头像时间戳
+         * 
+         */
+        std::string queryImageTimeStampAcordId(const std::string& id);
 
     private:
         MysqlQuery(const char* ip,const char* database,const char* user,const char*password);

@@ -10,9 +10,13 @@
 #include "AddFriendRequestJsonData.h"
 #include "AddFriendNotifyJsonData.h"
 #include "ProfileImageMsgJsonData.h"
+#include "GetProfileImageJsonData.h"
 #include "../PublicFunction.hpp"
 #include "Log.h"
 #include <fstream>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 using namespace boost;
 
@@ -290,6 +294,8 @@ void ChatClient::handleClientMessage(const std::string& message)
                 addFriendNotifyData.m_strId2=addFriendResponseData.m_strMyId;
                 addFriendNotifyData.m_strName1=MysqlQuery::Instance()->queryUserNameAcordId(addFriendResponseData.m_strFriendId);
                 addFriendNotifyData.m_strName2=MysqlQuery::Instance()->queryUserNameAcordId(addFriendResponseData.m_strMyId);
+                addFriendNotifyData.m_strImageStamp1=MysqlQuery::Instance()->queryImageTimeStampAcordId(addFriendResponseData.m_strFriendId);
+                addFriendNotifyData.m_strImageStamp2=MysqlQuery::Instance()->queryImageTimeStampAcordId(addFriendResponseData.m_strMyId);
                 auto sendStr=addFriendNotifyData.generateJson();
                 //通知到好友
                 //查看好友是否在线，在线就通知
@@ -421,6 +427,11 @@ void ChatClient::handleClientMessage(const std::string& message)
                 //将图片保存到本地，并将图片的路径保存到数据库中
                 std::string curPath=getCurrentDir();
                 //TODO从数据库获取上次的路径，删除上次的图片
+                std::string oldPath=MysqlQuery::Instance()->queryImagePathAcordId(profileImageMsgData.m_strId);
+                if(oldPath!="")
+                {
+                    remove(oldPath.c_str());
+                }
                 curPath+="/data/profileImage/"+profileImageMsgData.m_strImageName+"."+profileImageMsgData.m_strSuffix;
                 std::fstream out(curPath,std::ios::out);
                 if(out.is_open())
@@ -438,6 +449,49 @@ void ChatClient::handleClientMessage(const std::string& message)
             }
             m_mapImageUUIDAndSegment[profileImageMsgData.m_strUUID]=profileImageMsgData.m_iCurIndex;
         }
+        break;
+    case static_cast<int>(MessageType::getFriendProfileImage):
+        {
+            GetProfileImageJsonData getFriendProfileImageJsonData(message);
+            std::string imagePath=MysqlQuery::Instance()->queryImagePathAcordId(getFriendProfileImageJsonData.m_strId);
+            std::string timeStamp=MysqlQuery::Instance()->queryImageTimeStampAcordId(getFriendProfileImageJsonData.m_strId);
+            boost::uuids::uuid uid = boost::uuids::random_generator()();
+            const std::string uid_str = boost::uuids::to_string(uid);
+            if(imagePath!="")
+            {
+                std::fstream in(imagePath,std::ios::in);
+                if(in.is_open())
+                {
+                    std::string base64Str;
+                    in>>base64Str;
+                    in.close();
+                    int iSumIndex=base64Str.length()/kSegmentLength;
+                    if(base64Str.length()%kSegmentLength!=0)
+                    {
+                        iSumIndex++;
+                    }
+                    for(int i=0;i<iSumIndex;i++)
+                    {
+                        ProfileImageMsgJsonData profileImageMsgJsonData;
+                        profileImageMsgJsonData.m_strId=getFriendProfileImageJsonData.m_strId;
+                        profileImageMsgJsonData.m_strUUID=uid_str;
+                        profileImageMsgJsonData.m_strTimeStamp=timeStamp;
+                        profileImageMsgJsonData.m_iCurIndex=i+1;
+                        profileImageMsgJsonData.m_iSumIndex=iSumIndex;
+                        profileImageMsgJsonData.m_strBase64Msg=base64Str.substr(i*kSegmentLength,kSegmentLength);
+                        auto sendStr=profileImageMsgJsonData.generateJson();
+                        DoWrite(sendStr,profileImageMsgJsonData.generateJson().length());
+                    }
+                }
+                else{
+                    _LOG(Logcxx::Level::ERROR,"打开文件失败");
+                }
+            }
+            else{
+                _LOG(Logcxx::Level::ERROR,"数据库中没有该用户的头像");
+            }
+        }
+        break;
     default:
         break;
     }
