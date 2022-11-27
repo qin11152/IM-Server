@@ -418,9 +418,10 @@ void ChatClient::handleClientMessage(const std::string& message)
             if(profileImageMsgData.m_iCurIndex==profileImageMsgData.m_iSumIndex)
             {
                 //如果收到的片数到达了最后一个了
-                //TODO 将图片保存到本地，并将图片的路径保存到数据库中
+                //将图片保存到本地，并将图片的路径保存到数据库中
                 std::string curPath=getCurrentDir();
-                curPath+="/data/profileImage/"+profileImageMsgData.m_strImageName;
+                //TODO从数据库获取上次的路径，删除上次的图片
+                curPath+="/data/profileImage/"+profileImageMsgData.m_strImageName+"."+profileImageMsgData.m_strSuffix;
                 std::fstream out(curPath,std::ios::out);
                 if(out.is_open())
                 {
@@ -430,7 +431,7 @@ void ChatClient::handleClientMessage(const std::string& message)
                 else{
                     _LOG(Logcxx::Level::ERROR,"保存头像时，打开文件失败");
                 }
-                MysqlQuery::Instance()->updateImagePathAcordId(profileImageMsgData.m_strId,curPath);
+                MysqlQuery::Instance()->updateImagePathAcordId(profileImageMsgData.m_strId,curPath,profileImageMsgData.m_strTimeStamp);
                 m_mapImageUUIDAndBase64.erase(profileImageMsgData.m_strUUID);
                 m_mapImageUUIDAndSegment.erase(profileImageMsgData.m_strUUID);
                 //TODO 回复一个发送成功的消息

@@ -327,7 +327,7 @@ void MysqlQuery::queryUserFrinedList(std::vector<FriendInfo>& vecFriendList,std:
 {
     //std::string query="select id_friend, name from friend_info where id_my=\""+strUserId+"\" order by CONVERT( name USING gbk) COLLATE gbk_chinese_ci ASC";
     //printf("%s\n",query.c_str());
-    std::string query="SELECT a.id_my, a.name, b.imagetimestamp from friend_info as a inner JOIN user_info as b on (a.id_my=b.id and a.id_my=\""+strUserId+"\") order by CONVERT( a.`name` USING gbk) COLLATE gbk_chinese_ci DESC;";
+    std::string query="SELECT a.id_friend, a.name, b.imagetimestamp from friend_info as a inner JOIN user_info as b on (a.id_my=b.id and a.id_my=\""+strUserId+"\") order by CONVERT( a.`name` USING gbk) COLLATE gbk_chinese_ci DESC;";
     if(mysql_query(m_mysql,query.c_str()))
     {
         _LOG(Logcxx::ERROR,"select id_friend, name from friend_info failed,query is:%s",query.c_str());
@@ -396,11 +396,11 @@ std::string MysqlQuery::queryUserNameAcordId(const std::string& id)
     return name;
 }
 
-bool MysqlQuery::updateImagePathAcordId(const std::string& id,const std::string strIamgePath)
+bool MysqlQuery::updateImagePathAcordId(const std::string& id,const std::string strIamgePath,const std::string& timeStamp)
 {
-    std::string curTime=getCurrentTime();
-   std::string query="update user_info set image=\'"+strIamgePath+"\', imagetimestamp=\'"+curTime+"\' where id="+id; 
-   if(mysql_query(m_mysql,query.c_str()))
+    //std::string curTime=getCurrentTime();
+    std::string query="update user_info set image=\'"+strIamgePath+"\', imagetimestamp=\'"+timeStamp+"\' where id="+id; 
+    if(mysql_query(m_mysql,query.c_str()))
     {
         _LOG(Logcxx::ERROR,"update user image failed,query is:%s",query.c_str());
         return false;

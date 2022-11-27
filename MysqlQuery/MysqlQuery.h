@@ -2,7 +2,7 @@
  * @Author: qin11152 1052080761@qq.com
  * @Date: 2022-06-18 13:57:30
  * @LastEditors: qin11152 1052080761@qq.com
- * @LastEditTime: 2022-08-14 19:00:12
+ * @LastEditTime: 2022-11-27 13:15:27
  * @FilePath: /src/IM-Server/MysqlQuery/MysqlQuery.h
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -58,7 +58,7 @@ class MysqlQuery
         //根据id查找名称
         std::string queryUserNameAcordId(const std::string &id);
         //根据id插入图片到数据库中
-        bool updateImagePathAcordId(const std::string& id,const std::string strIamgePath);
+        bool updateImagePathAcordId(const std::string& id,const std::string strIamgePath,const std::string& timeStamp);
         //获取头像图片的路径
         std::string queryImagePathAcordId(const std::string& id);
 
