@@ -327,12 +327,13 @@ void MysqlQuery::queryUserFrinedList(std::vector<FriendInfo>& vecFriendList,std:
 {
     //std::string query="select id_friend, name from friend_info where id_my=\""+strUserId+"\" order by CONVERT( name USING gbk) COLLATE gbk_chinese_ci ASC";
     //printf("%s\n",query.c_str());
-    std::string query="SELECT a.id_friend, a.name, b.imagetimestamp from friend_info as a inner JOIN user_info as b on (a.id_my=b.id and a.id_my=\""+strUserId+"\") order by CONVERT( a.`name` USING gbk) COLLATE gbk_chinese_ci DESC;";
+    std::string query="SELECT a.id_friend, a.name, b.imagetimestamp from friend_info as a inner JOIN user_info as b on (a.id_friend=b.id and a.id_my=\""+strUserId+"\") order by CONVERT( a.`name` USING gbk) COLLATE gbk_chinese_ci DESC;";
     if(mysql_query(m_mysql,query.c_str()))
     {
         _LOG(Logcxx::ERROR,"select id_friend, name from friend_info failed,query is:%s",query.c_str());
         return;
     }
+
     MYSQL_RES* res=nullptr;
     //将查询的结果存储在res中
     res=mysql_store_result(m_mysql);
@@ -387,10 +388,10 @@ std::string MysqlQuery::queryUserNameAcordId(const std::string& id)
     //有就一直获取
     while(rowPtr=mysql_fetch_row(res))
     {
-        //可以通过循环获取每一行的内容，每一行中
-        //列的名称在上边已经进行了获取
-        //这里只有一行一列
-        name=rowPtr[0];
+        if(rowPtr[0]!=nullptr)
+        {
+            name=rowPtr[0];
+        }
     }
     mysql_free_result(res);
     return name;
@@ -431,7 +432,10 @@ std::string MysqlQuery::queryImagePathAcordId(const std::string& id)
         //可以通过循环获取每一行的内容，每一行中
         //列的名称在上边已经进行了获取
         //这里只有一行一列
-        image=rowPtr[0];
+        if(rowPtr[0]!=nullptr)
+        {
+            image=rowPtr[0];
+        }
     }
     mysql_free_result(res);
     return image;
@@ -463,10 +467,10 @@ std::string MysqlQuery::queryImageTimeStampAcordId(const std::string & id)
     //有就一直获取
     while(rowPtr=mysql_fetch_row(res))
     {
-        //可以通过循环获取每一行的内容，每一行中
-        //列的名称在上边已经进行了获取
-        //这里只有一行一列
-        imageTimeStamp=rowPtr[0];
+        if(rowPtr[0]!=nullptr)
+        {
+            imageTimeStamp=rowPtr[0];
+        }
     }
     mysql_free_result(res);
     return imageTimeStamp;

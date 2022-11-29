@@ -133,18 +133,19 @@ void ChatClient::DoRead()
                     while(m_endPosOfBuffer>PackageHeadSize)
                     {
                     //执行到此认为长度是大于包头的，然后去获取长度
-                    char lengthBuf[PackageHeadSize+1]{0};
-                    memcpy(lengthBuf,m_cBuffer,PackageHeadSize);
+                    //char lengthBuf[PackageHeadSize+1]{0};
+                    //memcpy(lengthBuf,m_cBuffer,PackageHeadSize);
+                    std::string lengthStr(m_cBuffer,PackageHeadSize);
                     //得到数据包的长度
-                    int lengthOfMessage=atoi(lengthBuf);
+                    int lengthOfMessage=atoi(lengthStr.c_str());
                     //进行第一次业务处理,查看是收到的数据是否大于包头指示的长度
                     //大于的时候就处理，小于就去继续读
                     if(m_endPosOfBuffer>=lengthOfMessage+PackageHeadSize)
                     {
                         //从buffer中取出这个长度的信息
-                        char message[lengthOfMessage+1]{0};
-                        memcpy(message,m_cBuffer+PackageHeadSize,lengthOfMessage);
-                        std::string test(message);
+                        //char message[lengthOfMessage+1]{0};
+                        //memcpy(message,m_cBuffer+PackageHeadSize,lengthOfMessage);
+                        std::string test(m_cBuffer+PackageHeadSize,lengthOfMessage);
                         //因已取出一部分信息，要把大缓冲区的内容更新一下
                         memcpy(m_cBuffer,m_cBuffer+lengthOfMessage+PackageHeadSize,BUFFERLENGTH-lengthOfMessage-PackageHeadSize);
                         //尾部标识也更新一下
@@ -228,10 +229,14 @@ void ChatClient::handleClientMessage(const std::string& message)
             m_ptrChatServer->removeDisconnetedClient(m_iId,self);
         }
     );
-    printf("recv message:%s\n",message.c_str());
+    if(""==message)
+    {
+        return;
+    }
+    //printf("recv message:%s\n",message.c_str());
     //传递的消息类型为json格式
     //同ptree来解析
-    //_LOG(Logcxx::INFO,"enter handle clientMessage: %s",message.c_str());
+    _LOG(Logcxx::INFO,"enter handle clientMessage: %s",message.c_str());
     ptree pt;
     std::stringstream ss(message);
     read_json(ss,pt);
@@ -455,6 +460,8 @@ void ChatClient::handleClientMessage(const std::string& message)
             GetProfileImageJsonData getFriendProfileImageJsonData(message);
             std::string imagePath=MysqlQuery::Instance()->queryImagePathAcordId(getFriendProfileImageJsonData.m_strId);
             std::string timeStamp=MysqlQuery::Instance()->queryImageTimeStampAcordId(getFriendProfileImageJsonData.m_strId);
+            std::string suffix=imagePath.substr(imagePath.find_last_of('.') + 1);//获取文件后缀
+            //printf("id:%s,timestamp:%s,suffix:%s",getFriendProfileImageJsonData.m_strId.c_str(),timeStamp.c_str(),suffix.c_str());
             boost::uuids::uuid uid = boost::uuids::random_generator()();
             const std::string uid_str = boost::uuids::to_string(uid);
             if(imagePath!="")
@@ -475,6 +482,7 @@ void ChatClient::handleClientMessage(const std::string& message)
                         ProfileImageMsgJsonData profileImageMsgJsonData;
                         profileImageMsgJsonData.m_strId=getFriendProfileImageJsonData.m_strId;
                         profileImageMsgJsonData.m_strUUID=uid_str;
+                        profileImageMsgJsonData.m_strSuffix=suffix;
                         profileImageMsgJsonData.m_strTimeStamp=timeStamp;
                         profileImageMsgJsonData.m_iCurIndex=i+1;
                         profileImageMsgJsonData.m_iSumIndex=iSumIndex;
@@ -484,11 +492,11 @@ void ChatClient::handleClientMessage(const std::string& message)
                     }
                 }
                 else{
-                    _LOG(Logcxx::Level::ERROR,"打开文件失败");
+                    _LOG(Logcxx::Level::ERROR,u8"打开文件失败");
                 }
             }
             else{
-                _LOG(Logcxx::Level::ERROR,"数据库中没有该用户的头像");
+                _LOG(Logcxx::Level::ERROR,u8"数据库中没有该用户的头像");
             }
         }
         break;
