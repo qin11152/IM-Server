@@ -2,7 +2,7 @@
  * @Author: qin11152 1052080761@qq.com
  * @Date: 2022-06-18 13:57:30
  * @LastEditors: qin11152 1052080761@qq.com
- * @LastEditTime: 2022-11-27 15:35:17
+ * @LastEditTime: 2022-12-12 21:16:10
  * @FilePath: /src/IM-Server/protocol/Mydefine.h
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -20,6 +20,15 @@ public:
 
 constexpr int PackageHeadSize=8;
 constexpr int kSegmentLength = 9000;
+
+/**
+ * brief：根据不同的需求来传递头像，做出不同处理.
+ */
+enum class ProfileImageType
+{
+    UpdateProfileImage=0,       //要求更新头像
+    AddFriendProfileImage,      //添加好友时传送的头像
+};
 
 enum class MessageType
 {

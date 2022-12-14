@@ -237,6 +237,11 @@ void ChatClient::handleClientMessage(const std::string& message)
     //传递的消息类型为json格式
     //同ptree来解析
     _LOG(Logcxx::INFO,"enter handle clientMessage: %s",message.c_str());
+    //不满足通信的格式就不要处理，避免崩溃掉
+    if(message.length()<7||message.substr(0,7)!="{\"type\"")
+    {
+        return;
+    }
     ptree pt;
     std::stringstream ss(message);
     read_json(ss,pt);
@@ -277,6 +282,50 @@ void ChatClient::handleClientMessage(const std::string& message)
                     //如果在线，就直接转发消息就行了
                     auto msg=message;
                     m_ptrChatServer->transferMessage(atoi(addFriendRequestData.m_strFriendId.c_str()),msg);
+
+                    //把头像也发送过去
+                    auto imagePath=MysqlQuery::Instance()->queryImagePathAcordId(addFriendRequestData.m_strMyId);
+                    std::string timeStamp=MysqlQuery::Instance()->queryImageTimeStampAcordId(addFriendRequestData.m_strMyId);
+                    std::string suffix=imagePath.substr(imagePath.find_last_of('.') + 1);//获取文件后缀
+                    boost::uuids::uuid uid = boost::uuids::random_generator()();
+                    const std::string uid_str = boost::uuids::to_string(uid);
+                    if(imagePath!="")
+                    {
+                        std::fstream in(imagePath,std::ios::in);
+                        if(in.is_open())
+                        {
+                            std::string base64Str;
+                            in>>base64Str;
+                            in.close();
+                            int iSumIndex=base64Str.length()/kSegmentLength;
+                            if(base64Str.length()%kSegmentLength!=0)
+                            {
+                                iSumIndex++;
+                            }
+                            for(int i=0;i<iSumIndex;i++)
+                            {
+                                ProfileImageMsgJsonData profileImageMsgJsonData;
+                                profileImageMsgJsonData.m_strId=addFriendRequestData.m_strMyId;
+                                profileImageMsgJsonData.m_strUUID=uid_str;
+                                profileImageMsgJsonData.m_strSuffix=suffix;
+                                profileImageMsgJsonData.m_strTimeStamp=timeStamp;
+                                profileImageMsgJsonData.m_iCurIndex=i+1;
+                                profileImageMsgJsonData.m_iSumIndex=iSumIndex;
+                                profileImageMsgJsonData.m_strBase64Msg=base64Str.substr(i*kSegmentLength,kSegmentLength);
+                                profileImageMsgJsonData.m_eImageType=ProfileImageType::AddFriendProfileImage;
+                                auto sendStr=profileImageMsgJsonData.generateJson();
+                                m_ptrChatServer->transferMessage(atoi(addFriendRequestData.m_strFriendId.c_str()),sendStr);
+                            }
+                        }
+                        else
+                        {
+                            _LOG(Logcxx::Level::ERROR,u8"打开文件失败");
+                        }
+                    }
+                    else
+                    {
+                        _LOG(Logcxx::Level::ERROR,u8"数据库中没有该用户的头像");
+                    }
                 }
                 else
                 {
@@ -381,6 +430,50 @@ void ChatClient::handleClientMessage(const std::string& message)
                 tmp.m_strSendUserId=item.m_strFromId;
                 tmp.m_strSendName=item.m_strSendName;
                 DoWrite(tmp.generateJson(),tmp.generateJson().length());
+
+                //把头像也发送过去
+                auto imagePath=MysqlQuery::Instance()->queryImagePathAcordId(item.m_strFromId);
+                std::string timeStamp=MysqlQuery::Instance()->queryImageTimeStampAcordId(item.m_strFromId);
+                std::string suffix=imagePath.substr(imagePath.find_last_of('.') + 1);//获取文件后缀
+                boost::uuids::uuid uid = boost::uuids::random_generator()();
+                const std::string uid_str = boost::uuids::to_string(uid);
+                if(imagePath!="")
+                {
+                    std::fstream in(imagePath,std::ios::in);
+                    if(in.is_open())
+                    {
+                        std::string base64Str;
+                        in>>base64Str;
+                        in.close();
+                        int iSumIndex=base64Str.length()/kSegmentLength;
+                        if(base64Str.length()%kSegmentLength!=0)
+                        {
+                            iSumIndex++;
+                        }
+                        for(int i=0;i<iSumIndex;i++)
+                        {
+                            ProfileImageMsgJsonData profileImageMsgJsonData;
+                            profileImageMsgJsonData.m_strId=item.m_strFromId;
+                            profileImageMsgJsonData.m_strUUID=uid_str;
+                            profileImageMsgJsonData.m_strSuffix=suffix;
+                            profileImageMsgJsonData.m_strTimeStamp=timeStamp;
+                            profileImageMsgJsonData.m_iCurIndex=i+1;
+                            profileImageMsgJsonData.m_iSumIndex=iSumIndex;
+                            profileImageMsgJsonData.m_strBase64Msg=base64Str.substr(i*kSegmentLength,kSegmentLength);
+                            profileImageMsgJsonData.m_eImageType=ProfileImageType::AddFriendProfileImage;
+                            auto sendStr=profileImageMsgJsonData.generateJson();
+                            DoWrite(sendStr,sendStr.length());
+                        }
+                    }
+                    else
+                    {
+                        _LOG(Logcxx::Level::ERROR,u8"打开文件失败");
+                    }
+                }
+                else
+                {
+                    _LOG(Logcxx::Level::INFO,u8"数据库中没有该用户的头像");
+                }
             }
         }
         break;
@@ -415,6 +508,7 @@ void ChatClient::handleClientMessage(const std::string& message)
             DoWrite(sendStr,getFriendListReplyData.generateJson().length());
         }
         break;
+    //收到头像
     case static_cast<int>(MessageType::ProfileImageMsg):
         {
             ProfileImageMsgJsonData profileImageMsgData(message);
@@ -455,6 +549,7 @@ void ChatClient::handleClientMessage(const std::string& message)
             m_mapImageUUIDAndSegment[profileImageMsgData.m_strUUID]=profileImageMsgData.m_iCurIndex;
         }
         break;
+    //收到获取头像请求
     case static_cast<int>(MessageType::getFriendProfileImage):
         {
             GetProfileImageJsonData getFriendProfileImageJsonData(message);
@@ -496,7 +591,7 @@ void ChatClient::handleClientMessage(const std::string& message)
                 }
             }
             else{
-                _LOG(Logcxx::Level::ERROR,u8"数据库中没有该用户的头像");
+                _LOG(Logcxx::Level::INFO,u8"数据库中没有该用户的头像");
             }
         }
         break;
