@@ -63,7 +63,7 @@ int MysqlQuery::InsertNewUser(const std::string name,const std::string&password,
 {
     //std::string exePahth=getCurrentDir();
     //刚开始时默认头像就是设定的那个图片
-    std::string profileImagePath="./data/profileImage/DefaultImageBase64.txt";
+    std::string profileImagePath="./data/profileImage/DefaultImage.jpg";
     //获取当前时间转换为字符串
     std::string time=getCurrentTime();
     int id=GetCurrentUserCount()+1;
