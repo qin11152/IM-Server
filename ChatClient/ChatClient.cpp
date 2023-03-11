@@ -164,9 +164,11 @@ void ChatClient::DoRead()
                 //读取到了错误或者断开连接
                 else
                 {
-                    //TODO read error and do something
-                    if(104==ec.value()||2==ec.value())
+                    //read eof or connection reset by peer
+                    //正常断开连接的时候会受到eof,而程序直接关闭，并且不处理socket的时候就会触发104错误
+                    if(104==ec.value()||boost::asio::error::eof==ec.value())
                     {
+                        printf("client disconnect,code:%d\n",ec.value());
                         //主动断开连接时，关闭socket，socket关闭后会立刻执行定时器的回调函数
                         m_clientSocket.cancel();
                         auto self=shared_from_this();
