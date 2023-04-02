@@ -2,6 +2,8 @@
 #include "Log.h"
 #include "../PublicFunction.hpp"
 
+#include <string>
+
 std::mutex MysqlQuery::m_mutex;
 std::shared_ptr<MysqlQuery> MysqlQuery::m_ptrInstance={nullptr};
 
@@ -474,6 +476,36 @@ std::string MysqlQuery::queryImageTimeStampAcordId(const std::string & id)
     }
     mysql_free_result(res);
     return imageTimeStamp;
+}
+
+std::string MysqlQuery::getCurGroupId()
+{
+    std::string query="select count(*) from group_properities";
+    if(mysql_query(m_mysql,query.c_str()))
+    {
+        _LOG(Logcxx::ERROR,"select max(id) from group_properities failed,query is:%s",query.c_str());
+        return "";
+    }
+    std::string groupId="";
+    MYSQL_RES* res=nullptr;
+    //将查询的结果存储在res中
+    res=mysql_store_result(m_mysql);
+    //获取count(*)的结果
+    MYSQL_ROW rowPtr=nullptr;
+    //有就一直获取
+    while(rowPtr=mysql_fetch_row(res))
+    {
+        if(rowPtr[0]!=nullptr)
+        {
+            groupId=rowPtr[0];
+        }
+    }
+    return groupId;
+}
+
+bool MysqlQuery::insertGroupInfo(const std::string& groupId,const std::string& groupName,const std::string& groupImage)
+{
+    return false;
 }
 
 MysqlQuery::~MysqlQuery(){
