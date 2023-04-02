@@ -6,6 +6,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../)
 
 aux_source_directory(. DIR_SRCS)
 aux_source_directory(./protocol DIR_SRCS)
+aux_source_directory(./protocol/ImageJsonData DIR_SRCS)
 aux_source_directory(./module DIR_SRCS)
 aux_source_directory(./MysqlQuery DIR_SRCS)
 aux_source_directory(./ChatClient DIR_SRCS)
@@ -14,7 +15,10 @@ include_directories("${PROJECT_SOURCE_DIR}/MysqlQuery")
 include_directories("${PROJECT_SOURCE_DIR}/ChatServer")
 include_directories("${PROJECT_SOURCE_DIR}/ChatClient")
 include_directories("${PROJECT_SOURCE_DIR}/protocol")
+include_directories("${PROJECT_SOURCE_DIR}/protocol/ImageJsonData")
 include_directories("${PROJECT_SOURCE_DIR}/module")
+include_directories("${PROJECT_SOURCE_DIR}")
+include_directories("${PROJECT_SOURCE_DIR}/include")
 
 
 
