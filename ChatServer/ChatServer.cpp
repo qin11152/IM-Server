@@ -1,60 +1,73 @@
-#include "ChatServer.h"
+/*
+ * @Author: qin11152 1052080761@qq.com
+ * @Date: 2022-06-18 13:57:30
+ * @LastEditors: qin11152 1052080761@qq.com
+ * @LastEditTime: 2023-03-21 20:57:14
+ * @FilePath: /IM-Server/ChatServer/ChatServer.cpp
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE/
+ */
 #include "Log.h"
+#include "ChatServer.h"
 
-ChatServer::ChatServer(io_context& io_ctx,short port)
-:m_ioc(io_ctx),
-m_acceptor(io_ctx,tcp::endpoint(tcp::v4(),port))
+namespace net
 {
-    DoAccept();
-}
+    ChatServer::ChatServer(io_context& io_ctx,short port)
+    :m_ioc(io_ctx),
+    m_acceptor(io_ctx,tcp::endpoint(tcp::v4(),port))
+    {
+        DoAccept();
+    }
 
-void ChatServer::DoAccept()
-{
-    m_acceptor.async_accept(
-        [this](std::error_code ec,tcp::socket socket)
-        {
-            if(!ec)
+    void ChatServer::DoAccept()
+    {
+        m_acceptor.async_accept(
+            [this](std::error_code ec,tcp::socket socket)
             {
-                auto new_Acceptor=std::make_shared<ChatClient>(std::move(socket),this,m_ioc);
-                m_socketVec.push_back(new_Acceptor);
-                new_Acceptor->Start();
+                if(!ec)
+                {
+                    auto new_Acceptor=std::make_shared<ChatClient>(std::move(socket),this,m_ioc);
+                    //不用保存，doread时会shared_from_this，安全
+                    //m_socketVec.push_back(new_Acceptor);
+                    new_Acceptor->Start();
+                }
+                DoAccept();
             }
-            DoAccept();
-        }
-    );
-}
-
-void ChatServer::removeDisconnetedClient(int id,std::shared_ptr<ChatClient> ptr)
-{
-    MysqlQuery::Instance()->updateUserOnlineState(std::to_string(id),false);
-    if(m_idMap.find(id)!=m_idMap.end())
-    {
-        m_idMap.erase(id);
+        );
     }
-    for(auto iter=m_socketVec.begin();iter!=m_socketVec.end();++iter)
+
+    void ChatServer::removeDisconnetedClient(int id,std::shared_ptr<ChatClient> ptr)
     {
-        if(*iter==ptr)
+        MysqlQuery::Instance()->updateUserOnlineState(std::to_string(id),false);
+        if(m_idMap.find(id)!=m_idMap.end())
         {
-            m_socketVec.erase(iter);
-            return;
+            m_idMap.erase(id);
         }
+        // for(auto iter=m_socketVec.begin();iter!=m_socketVec.end();++iter)
+        // {
+        //     if(*iter==ptr)
+        //     {
+        //         m_socketVec.erase(iter);
+        //         return;
+        //     }
+        // }
     }
-}
 
-void ChatServer::insertIntoIdMap(int id,std::shared_ptr<ChatClient> m_clientPtr)
-{
-    m_idMap[id]=m_clientPtr;
-}
+    void ChatServer::insertIntoIdMap(int id,std::shared_ptr<ChatClient> m_clientPtr)
+    {
+        //这里不是为了保证连接的存在，是为了转发的时候根据id能找到连接
+        m_idMap[id]=m_clientPtr;
+    }
 
-bool ChatServer::transferMessage(int id,std::string& message)
-{
-    if(m_idMap.find(id)!=m_idMap.end())
+    bool ChatServer::transferMessage(int id,std::string& message)
     {
-        m_idMap[id]->DoWrite(message,message.length());
+        if(m_idMap.find(id)!=m_idMap.end())
+        {
+            m_idMap[id]->DoWrite(message,message.length());
+        }
+        else 
+        {
+            _LOG(Logcxx::ERROR,"when transfer message couldn't find id,id:%d",id);
+        }
+        return true;
     }
-    else 
-    {
-        _LOG(Logcxx::ERROR,"when transfer message couldn't find id,id:%d",id);
-    }
-    return true;
 }
