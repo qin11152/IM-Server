@@ -1,11 +1,16 @@
+#pragma once
+
 #include "JsonBaseData.h"
 
-class HeartPackageJsonData :
-    public JsonBaseData
+namespace protocol
 {
-public:
-    HeartPackageJsonData(const std::string& message="");
-    void parse(const std::string& message)override;
+    class HeartPackageJsonData :
+        public JsonBaseData
+    {
+    public:
+        HeartPackageJsonData(const std::string& message="");
+        void parse(const std::string& message)override;
 
-    MessageType m_strType{ MessageType::HeartPackage};
-};
+        MessageType m_strType{ MessageType::HeartPackage};
+    };
+} // namespace protocol

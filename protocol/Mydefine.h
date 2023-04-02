@@ -2,7 +2,7 @@
  * @Author: qin11152 1052080761@qq.com
  * @Date: 2022-06-18 13:57:30
  * @LastEditors: qin11152 1052080761@qq.com
- * @LastEditTime: 2023-02-22 21:58:24
+ * @LastEditTime: 2023-03-21 21:36:43
  * @FilePath: /src/IM-Server/protocol/Mydefine.h
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -18,7 +18,13 @@ public:
     std::string m_strImageTimeStamp{""};    //好友的头像时间戳
 };
 
-constexpr int PackageHeadSize=8;
+struct PackageHead
+{
+    char flagBit[4]{ "&q*" };
+    unsigned int length;
+    unsigned char cmdId;
+};
+constexpr int PackageHeadSize=sizeof(PackageHead);
 constexpr int kSegmentLength = 9000;
 
 /**
@@ -33,6 +39,7 @@ enum class ProfileImageType
 enum class MessageType
 {
     Default,
+    InfoWithImage,
     RegisterRequest,
     RegisterResponse,
     LoginRequest,
@@ -50,17 +57,11 @@ enum class MessageType
     FriendListResponse,
     RefreshFriendListRequest,
     RefreshFriendListResponse,
-    GetFriendList,
+    GetFriendListRequest,
     GetFriendListReply,
     ProfileImageMsg,
     getFriendProfileImage,
     getFriendProfileImageReply,
-};
-
-struct LengthInfo
-{
-    int length;
-    LengthInfo(int l):length(l){}
 };
 
 using MessageTypeBaseType=std::underlying_type<MessageType>;
