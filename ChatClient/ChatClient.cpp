@@ -13,6 +13,7 @@
 #include "AddFriendRequestJsonData.h"
 #include "SingleChatMessageJsonData.h"
 #include "AddFriendResponseJsonData.h"
+#include "StartGroupChatJsonData.h"
 
 #include <fstream>
 #include <boost/uuid/uuid.hpp>
@@ -33,6 +34,7 @@ namespace net
     m_timerForStopReceiveImage(ioc,std::chrono::seconds(5))
     { 
         initMsgCallback();
+        initImageMsgCallback();
         //m_timer.async_wait(std::bind(&ChatClient::removeSelfFromServer,this));
         m_timer.async_wait
         (
@@ -142,13 +144,14 @@ namespace net
             {
                 if(m_bImageWrite)
                 {
-                    m_iImageLength-=length;
+                    m_stuRecvImageInfo.m_nImageSize -=length;
                     m_osImageWrite.write(m_oneBuffer,length);
-                    if(0==m_iImageLength)
+                    if(0==m_stuRecvImageInfo.m_nImageSize)
                     {
                         m_timerForStopReceiveImage.cancel();
                         m_bImageWrite=false;
                         m_osImageWrite.close();
+                        handleImageMessage(m_stuRecvImageInfo.m_strJsonMsg,m_stuRecvImageInfo.m_strImageName);
                     }
                     DoRead();
                     return;
@@ -157,8 +160,7 @@ namespace net
                 memcpy(m_cBuffer+m_endPosOfBuffer,m_oneBuffer,length);
                 //每次存储到大缓冲区后都要更新他的尾部标识
                 m_endPosOfBuffer+=length;
-                //清空一下从底层接受消息的缓冲区
-                memset(m_oneBuffer,0,FIRSTBUFFERLENGTH);
+                std::string str(m_cBuffer,m_endPosOfBuffer);
                 
                 int pos=0;
                 //要读到固定的包头才行
@@ -168,12 +170,6 @@ namespace net
                 }
                 memcpy(m_cBuffer,m_cBuffer+pos,m_endPosOfBuffer-pos);
                 m_endPosOfBuffer-=pos;
-                //一直等待，直到读到了足够的字节数
-                if(m_endPosOfBuffer<PackageHeadSize)
-                {
-                    //然后继续读取
-                    DoRead();
-                }
                 
                 while(m_endPosOfBuffer>PackageHeadSize)
                 {
@@ -189,35 +185,73 @@ namespace net
                         //得到数据包的长度
                         //进行第一次业务处理,查看是收到的数据是否大于包头指示的长度
                         //大于的时候就处理，小于就去继续读
-                        if(m_endPosOfBuffer>=lengthOfMessage+PackageHeadSize)
+                        //读到指定长度为止
+                        while(m_endPosOfBuffer<lengthOfMessage+PackageHeadSize)
                         {
-                            std::string test(m_cBuffer+PackageHeadSize,lengthOfMessage);
-                            //因已取出一部分信息，要把大缓冲区的内容更新一下
-                            memcpy(m_cBuffer,m_cBuffer+lengthOfMessage+PackageHeadSize,BUFFERLENGTH-lengthOfMessage-PackageHeadSize);
-                            //尾部标识也更新一下
-                            m_endPosOfBuffer-=(lengthOfMessage+PackageHeadSize);
-                            handleClientMessage(test);
+                            memset(m_oneBuffer,0,FIRSTBUFFERLENGTH);
+                            boost::system::error_code ecs;
+                            int n=read(m_clientSocket,boost::asio::buffer(m_oneBuffer,FIRSTBUFFERLENGTH),ecs);
+                            if(ecs)
+                            {
+                                m_clientSocket.cancel(); 
+                                m_ptrChatServer->removeDisconnetedClient(m_iId,self);
+                                return;
+                            }
+                            memcpy(m_cBuffer+m_endPosOfBuffer,m_oneBuffer,n);
+                            m_endPosOfBuffer+=n;
                         }
-                        else
-                        {
-                            //然后继续读取
-                            DoRead();
-                            return;
-                        }
+                        std::string test(m_cBuffer+PackageHeadSize,lengthOfMessage);
+                        //因已取出一部分信息，要把大缓冲区的内容更新一下
+                        memcpy(m_cBuffer,m_cBuffer+lengthOfMessage+PackageHeadSize,BUFFERLENGTH-(lengthOfMessage+PackageHeadSize));
+                        //尾部标识也更新一下
+                        m_endPosOfBuffer-=(lengthOfMessage+PackageHeadSize);
+                        handleClientMessage(test);
                     }
                     else if(0x0012==head->cmdId)
                     {
-                        //TODO后续图片文件的处理，需要定时器，需要考虑名字，需要考虑前边的json和后边的文件怎么组合
-                        //处理图片消息
-                        std::string tmpStr(m_cBuffer+PackageHeadSize,m_endPosOfBuffer-PackageHeadSize);
-                        m_iImageLength = lengthOfMessage-tmpStr.length();
-                        memcpy(m_cBuffer,m_cBuffer+m_endPosOfBuffer,BUFFERLENGTH-m_endPosOfBuffer);
+                        while(m_endPosOfBuffer<lengthOfMessage+PackageHeadSize)
+                        {
+                            memset(m_oneBuffer,0,FIRSTBUFFERLENGTH);
+                            boost::system::error_code ecs;
+                            int n=read(m_clientSocket,boost::asio::buffer(m_oneBuffer,FIRSTBUFFERLENGTH),ecs);
+                            if(ecs)
+                            {
+                                m_clientSocket.cancel(); 
+                                m_ptrChatServer->removeDisconnetedClient(m_iId,self);
+                                return;
+                            }
+                            memcpy(m_cBuffer+m_endPosOfBuffer,m_oneBuffer,n);
+                        }
+                        //先获取到跟图片信息相关的json字符串
+                        std::string tmpStr(m_cBuffer+PackageHeadSize,lengthOfMessage);
+                        //因已取出一部分信息，要把大缓冲区的内容更新一下
+                        memcpy(m_cBuffer,m_cBuffer+lengthOfMessage+PackageHeadSize,BUFFERLENGTH-lengthOfMessage-PackageHeadSize);
                         //尾部标识也更新一下
-                        m_endPosOfBuffer=0;
-                        //写入图片文件
-                        std::string fileName="qin.jpg";
+                        m_endPosOfBuffer-=(lengthOfMessage+PackageHeadSize);
+
+                        m_stuRecvImageInfo.m_strJsonMsg=tmpStr;
+
+                        protocol::image::StartGroupJsonData startGroupChatData(tmpStr);
+                        m_stuRecvImageInfo.m_nImageSize=startGroupChatData.m_iImageLenth;
+
+                        //当前时间转字符串
+                        std::time_t t=std::time(nullptr);
+                        std::tm* now=std::localtime(&t);
+                        std::stringstream ss;
+                        ss<<now->tm_year+1900<<now->tm_mon+1<<now->tm_mday<<now->tm_hour<<now->tm_min<<now->tm_sec;
+                        std::string fileName=ss.str()+"."+startGroupChatData.m_strImageSuffix;
+                        m_stuRecvImageInfo.m_strImageName=fileName;
                         m_osImageWrite.open(fileName.c_str(),std::ios::binary|std::ios::app);
-                        m_osImageWrite.write(tmpStr.c_str(),tmpStr.length());
+
+                        char buf[m_endPosOfBuffer]{0};
+                        if(m_endPosOfBuffer>0)
+                        {
+                            memcpy(buf,m_cBuffer,m_endPosOfBuffer);
+                            m_osImageWrite.write(buf,m_endPosOfBuffer);
+                            memset(m_cBuffer,0,m_endPosOfBuffer);
+                            m_stuRecvImageInfo.m_nImageSize-=m_endPosOfBuffer;
+                            m_endPosOfBuffer=0;
+                        }
                         m_bImageWrite=true;
                         m_timerForStopReceiveImage.expires_after(std::chrono::seconds(5));
                         m_timerForStopReceiveImage.async_wait([this](const std::error_code& ec){
@@ -230,28 +264,21 @@ namespace net
                         });
                     }
                 }
-                //业务处理完了，继续读
                 DoRead();
+                //业务处理完了，继续读
             }
             //读取到了错误或者断开连接
             else
             {
                 //read eof or connection reset by peer
                 //正常断开连接的时候会受到eof,而程序直接关闭，并且不处理socket的时候就会触发104错误
-                if(boost::asio::error::eof==ec.value())
+                if(boost::asio::error::eof!=ec.value())
                 {
-                    //主动断开连接时，关闭socket，socket关闭后会立刻执行定时器的回调函数
-                    m_clientSocket.cancel();
-                    auto self=shared_from_this();
-                    m_ptrChatServer->removeDisconnetedClient(m_iId,self);
+                    _LOG(Logcxx::INFO,"connection dis unnormally,error code:%d",ec.value());
                 }
-                else if(boost::asio::error::connection_reset==ec.value())
-                {
-                    _LOG(Logcxx::INFO,"connection dis unnormally");
-                    m_clientSocket.cancel();
-                    auto self=shared_from_this();
-                    m_ptrChatServer->removeDisconnetedClient(m_iId,self);
-                }
+                
+                m_clientSocket.cancel(); 
+                m_ptrChatServer->removeDisconnetedClient(m_iId,self);
                 return;
             }
         }
@@ -288,20 +315,8 @@ namespace net
                 m_ptrChatServer->removeDisconnetedClient(m_iId,self);
             }
         );
-        if(""==message)
-        {
-            return;
-        }
+        //_LOG(Logcxx::INFO,"enter handle clientMessage: %s",message.c_str());
         //传递的消息类型为json格式
-        //同ptree来解析
-        _LOG(Logcxx::INFO,"enter handle clientMessage: %s",message.c_str());
-#if 0
-        //不满足通信的格式就不要处理，避免崩溃掉
-        if(message.length()<7||message.substr(0,7)!="{\"type\"")
-        {
-            return;
-        }
-#endif
         //rapidjson解析json
         rapidjson::Document doc;
         doc.Parse(message.c_str());
@@ -324,6 +339,49 @@ namespace net
         return;
     }
 
+    void ChatClient::handleImageMessage(const std::string &imageJsonData, const std::string &imagePath)
+    {
+        //收到任意消息，都把定时器更新一下
+        m_timer.cancel();
+        //m_timer.expires_at(m_timer.expires_at()+boost::posix_time::seconds(kHeartPackageTime)-m_timer.expires_from_now());
+        m_timer.expires_from_now(boost::posix_time::seconds(kHeartPackageTime));
+        m_timer.async_wait
+        (
+            [this](const std::error_code& ec)
+            {
+                //printf("error code is:%d\n",ec.value());
+                if(0!=ec.value())
+                {
+                    return;
+                }
+                m_clientSocket.cancel();
+                auto self=shared_from_this();
+                m_ptrChatServer->removeDisconnetedClient(m_iId,self);
+            }
+        );
+        //传递的消息类型为json格式
+        //rapidjson解析json
+        rapidjson::Document doc;
+        doc.Parse(imageJsonData.c_str());
+        if(doc.HasParseError())
+        {
+            _LOG(Logcxx::INFO,"json parse error");
+            return;
+        }
+        //首先获取这次得到的消息的类型
+        int imessageType=doc["type"].GetInt();
+        
+        if(m_mapImageMsgHandleFunc.count(imessageType))
+        {
+            m_mapImageMsgHandleFunc[imessageType](imageJsonData,imagePath);
+        }
+        else
+        {
+            _LOG(Logcxx::INFO,"no such message type");
+        }
+        return;
+    }
+
     void ChatClient::initMsgCallback()
     {
         m_mapMsgHandleFunc[static_cast<int>(MessageType::LoginRequest)]=std::bind(&ChatClient::handleLoginMessage,this,std::placeholders::_1);
@@ -335,8 +393,7 @@ namespace net
         m_mapMsgHandleFunc[static_cast<int>(MessageType::HeartPackage)]=std::bind(&ChatClient::handleKeepAliveMessage,this,std::placeholders::_1);
         m_mapMsgHandleFunc[static_cast<int>(MessageType::InitialRequest)]=std::bind(&ChatClient::handleInitMessage,this,std::placeholders::_1);
         m_mapMsgHandleFunc[static_cast<int>(MessageType::SingleChat)]=std::bind(&ChatClient::handleChatMessage,this,std::placeholders::_1);
-        m_mapMsgHandleFunc[static_cast<int>(MessageType::ProfileImageMsg)]=std::bind(&ChatClient::handleRevcProfileImageMessage,this,std::placeholders::_1);
-        m_mapMsgHandleFunc[static_cast<int>(MessageType::StartGroupChat)]=std::bind(&ChatClient::handleStartGroupChatMessage,this,std::placeholders::_1);
+        m_mapMsgHandleFunc[static_cast<int>(MessageType::ProfileImageMsg)]=std::bind(&ChatClient::handleRevcProfileImageMessage,this,std::placeholders::_1);    
     }   
 
     void ChatClient::handleLoginMessage(const std::string &message)
@@ -689,10 +746,11 @@ namespace net
             _LOG(Logcxx::Level::INFO,"image not contain in database");
         }
     }
-    void ChatClient::handleStartGroupChatMessage(const std::string &message)
+    void ChatClient::initImageMsgCallback()
     {
-        ptree pt;
-        std::stringstream ss(message);
-        read_json(ss,pt);
+        m_mapImageMsgHandleFunc[static_cast<int>(MessageType::InfoWithImage)]=(std::bind(&ChatClient::handleStartGroupChatMessage,this,std::placeholders::_1,std::placeholders::_2));
+    }
+    void ChatClient::handleStartGroupChatMessage(const std::string &message, const std::string &imagePath)
+    {
     }
 }
