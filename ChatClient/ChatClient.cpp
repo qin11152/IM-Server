@@ -33,6 +33,7 @@ namespace net
     m_timer(ioc,boost::posix_time::seconds(kHeartPackageTime)),
     m_timerForStopReceiveImage(ioc,std::chrono::seconds(5))
     { 
+        printf("new client\n");
         initMsgCallback();
         initImageMsgCallback();
         //m_timer.async_wait(std::bind(&ChatClient::removeSelfFromServer,this));
@@ -135,6 +136,7 @@ namespace net
         //首先清空读缓冲区
         memset(m_oneBuffer,0,FIRSTBUFFERLENGTH);
         //开启异步读任务，传递buffer和回调函数，这里用的lambda表达式
+        printf("read1\n");
         m_clientSocket.async_read_some
         (
         boost::asio::buffer(m_oneBuffer,FIRSTBUFFERLENGTH),
@@ -142,6 +144,7 @@ namespace net
         {
             if(!ec)
             {
+                printf("read2\n");
                 if(m_bImageWrite)
                 {
                     m_stuRecvImageInfo.m_nImageSize -=length;
@@ -156,17 +159,25 @@ namespace net
                     DoRead();
                     return;
                 }
+                //std::string tss(m_cBuffer,m_endPosOfBuffer);
+                printf("recv:%s\n",m_oneBuffer);
                 //会把从网络传递来的数据从小缓冲区存在一个大缓冲区中，在大缓冲区中进行业务处理
                 memcpy(m_cBuffer+m_endPosOfBuffer,m_oneBuffer,length);
                 //每次存储到大缓冲区后都要更新他的尾部标识
                 m_endPosOfBuffer+=length;
                 std::string str(m_cBuffer,m_endPosOfBuffer);
-                
+                printf("read len:%d\n",length);
                 int pos=0;
                 //要读到固定的包头才行
                 while(pos<m_endPosOfBuffer && memcmp(m_cBuffer+pos,"&q*b",4)!=0)
                 {
                     pos+=4;
+                }
+                printf("find pos %d,and end is:%d\n",pos,m_endPosOfBuffer);
+                if(pos>=m_endPosOfBuffer)
+                {
+                    //如果没有找到包头，就把缓冲区清空
+                    pos=m_endPosOfBuffer;
                 }
                 memcpy(m_cBuffer,m_cBuffer+pos,m_endPosOfBuffer-pos);
                 m_endPosOfBuffer-=pos;
@@ -315,7 +326,7 @@ namespace net
                 m_ptrChatServer->removeDisconnetedClient(m_iId,self);
             }
         );
-        //_LOG(Logcxx::INFO,"enter handle clientMessage: %s",message.c_str());
+        _LOG(Logcxx::INFO,"enter handle clientMessage: %s",message.c_str());
         //传递的消息类型为json格式
         //rapidjson解析json
         rapidjson::Document doc;
