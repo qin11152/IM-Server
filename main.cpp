@@ -18,7 +18,7 @@
 int main(int argc,char* argv[])
 {
     Logcxx::get_mutable_instance().Init("./log4cxx.properties");
-    unsigned short port=9999;
+    unsigned short port=19999;
     boost::asio::io_context io;
     net::ChatServer server(io,port);
     for(int i=0;i<10;++i)
