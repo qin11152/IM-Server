@@ -9,8 +9,13 @@
 #pragma once
 
 #include "Mydefine.h"
-#include <mysql/mysql.h>
-#include <mysql/mysqld_error.h>
+#if defined(__linux__)
+    #include <mysql/mysql.h>
+    #include <mysql/mysqld_error.h>
+#elif defined(_WIN32)
+    #include <mysql.h>
+    #include <mysqld_error.h>
+#endif
 #include <stdio.h>
 #include <string>
 #include <iostream>

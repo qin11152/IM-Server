@@ -35,7 +35,8 @@ MysqlQuery::MysqlQuery(const char* ip,const char* database,const char* user,cons
     initMysql();
 }
 
-void MysqlQuery::initMysql(){
+void MysqlQuery::initMysql()
+{
     mysql_real_connect(m_mysql,m_destinationIp.c_str(),m_destinationUser.c_str(),
     m_destinationPassword.c_str(),m_destinationDatabase.c_str(),0,NULL,0);
     if(m_mysql==NULL){
