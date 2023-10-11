@@ -136,7 +136,7 @@ namespace net
         //首先清空读缓冲区
         memset(m_oneBuffer,0,FIRSTBUFFERLENGTH);
         //开启异步读任务，传递buffer和回调函数，这里用的lambda表达式
-        printf("read1\n");
+        //printf("read1\n");
         m_clientSocket.async_read_some
         (
         boost::asio::buffer(m_oneBuffer,FIRSTBUFFERLENGTH),
@@ -144,7 +144,7 @@ namespace net
         {
             if(!ec)
             {
-                printf("read2\n");
+                //printf("read2\n");
                 if(m_bImageWrite)
                 {
                     m_stuRecvImageInfo.m_nImageSize -=length;
@@ -160,20 +160,20 @@ namespace net
                     return;
                 }
                 //std::string tss(m_cBuffer,m_endPosOfBuffer);
-                printf("recv:%s\n",m_oneBuffer);
+                //printf("recv:%s\n",m_oneBuffer);
                 //会把从网络传递来的数据从小缓冲区存在一个大缓冲区中，在大缓冲区中进行业务处理
                 memcpy(m_cBuffer+m_endPosOfBuffer,m_oneBuffer,length);
                 //每次存储到大缓冲区后都要更新他的尾部标识
                 m_endPosOfBuffer+=length;
                 std::string str(m_cBuffer,m_endPosOfBuffer);
-                printf("read len:%d\n",length);
+                //printf("read len:%d\n",length);
                 int pos=0;
                 //要读到固定的包头才行
                 while(pos<m_endPosOfBuffer && memcmp(m_cBuffer+pos,"&q*b",4)!=0)
                 {
                     pos+=4;
                 }
-                printf("find pos %d,and end is:%d\n",pos,m_endPosOfBuffer);
+                //printf("find pos %d,and end is:%d\n",pos,m_endPosOfBuffer);
                 if(pos>=m_endPosOfBuffer)
                 {
                     //如果没有找到包头，就把缓冲区清空
@@ -417,12 +417,13 @@ namespace net
         std::string password=pt.get<std::string>("UserPassword");
         bool logInState=false;
         //查询一下数据库
-        if(MysqlQuery::Instance()->VertifyPassword(atoi(userId.c_str()),password))
+        database::UserInfoTable userInfoTable;
+        if(userInfoTable.vertifyPassword(atoi(userId.c_str()),password))
         {
             logInState=true;
         }
         LoginInReplyData logInReplyData;
-        logInReplyData.m_strUserName=MysqlQuery::Instance()->queryUserNameAcordId(userId);
+        logInReplyData.m_strUserName=userInfoTable.queryUserNameAcordId(userId);
         logInReplyData.m_bLoginInResult=logInState;
         std::string loginReplyMessage=logInReplyData.generateJson();
         DoWrite(loginReplyMessage,loginReplyMessage.length());
@@ -435,7 +436,9 @@ namespace net
         std::string userName=pt.get<std::string>("UserName");
         std::string password=pt.get<std::string>("UserPassword");
         bool registerState=false;
-        int id=MysqlQuery::Instance()->InsertNewUser(userName,password,"");
+        database::UserInfoTable userInfoTable;
+        int id=-1;
+        userInfoTable.insertNewUser(id,userName,password,"");
         if(-1!=id)
         {
             registerState=true;
@@ -454,7 +457,8 @@ namespace net
         SingleChatMessageJsonData singleChatData(message);
         //std::string recvId=pt.get<std::string>("RecvUserId");
         //获取一下要接受消息的人的在线状态
-        bool onlineState=MysqlQuery::Instance()->queryUserIsOnline(singleChatData.m_strRecvUserId);
+        database::UserInfoTable userInfoTable;
+        bool onlineState=userInfoTable.queryUserIsOnline(singleChatData.m_strRecvUserId);
         //如果在线，就转发
         if(onlineState)
         {
@@ -479,7 +483,8 @@ namespace net
         std::string userId=pt.get<std::string>("UserId");
         m_iId=atoi(userId.c_str());
         m_ptrChatServer->insertIntoIdMap(atoi(userId.c_str()),shared_from_this());
-        MysqlQuery::Instance()->updateUserOnlineState(userId,true);
+        database::UserInfoTable userInfoTable;
+        userInfoTable.updateUserOnlineState(userId,true);
         //查询表获取好友列表，并发送
         GetFriendListReplyData getFriendListReplyData;
         MysqlQuery::Instance()->queryUserFrinedList(getFriendListReplyData.m_vecFriendList,userId);
@@ -497,7 +502,7 @@ namespace net
             AddFriendRequestJsonData tmp;
             tmp.m_strFriendId=item.m_strFriendId;
             tmp.m_strMyId=item.m_strMyId;
-            tmp.m_strName=MysqlQuery::Instance()->queryUserNameAcordId(tmp.m_strFriendId);
+            tmp.m_strName=userInfoTable.queryUserNameAcordId(tmp.m_strFriendId);
             tmp.m_strVerifyMsg=item.m_strVerifyMsg;
             DoWrite(tmp.generateJson(),tmp.generateJson().length());
         }
@@ -517,8 +522,10 @@ namespace net
             DoWrite(tmp.generateJson(),tmp.generateJson().length());
 
             //把头像也发送过去
-            auto imagePath=MysqlQuery::Instance()->queryImagePathAcordId(item.m_strFromId);
-            std::string timeStamp=MysqlQuery::Instance()->queryImageTimeStampAcordId(item.m_strFromId);
+            std::string imagePath="";
+            userInfoTable.queryImagePathAcordId(item.m_strFromId,imagePath);
+            std::string timeStamp="";
+            userInfoTable.queryImageTimeStampAcordId(item.m_strFromId,timeStamp);
             std::string suffix=imagePath.substr(imagePath.find_last_of('.') + 1);//获取文件后缀
             boost::uuids::uuid uid = boost::uuids::random_generator()();
             const std::string uid_str = boost::uuids::to_string(uid);
@@ -568,20 +575,21 @@ namespace net
         read_json(ss,pt);
         AddFriendResponseJsonData addFriendResponseData(message);
         //如果同意，双方的好友库里增加好友信息
+        database::UserInfoTable userInfoTable;
         if(addFriendResponseData.m_bResult)
         {
             //通知双方你们已经是好友了
             AddFriendNotify addFriendNotifyData;
             addFriendNotifyData.m_strId1=addFriendResponseData.m_strFriendId;
             addFriendNotifyData.m_strId2=addFriendResponseData.m_strMyId;
-            addFriendNotifyData.m_strName1=MysqlQuery::Instance()->queryUserNameAcordId(addFriendResponseData.m_strFriendId);
-            addFriendNotifyData.m_strName2=MysqlQuery::Instance()->queryUserNameAcordId(addFriendResponseData.m_strMyId);
-            addFriendNotifyData.m_strImageStamp1=MysqlQuery::Instance()->queryImageTimeStampAcordId(addFriendResponseData.m_strFriendId);
-            addFriendNotifyData.m_strImageStamp2=MysqlQuery::Instance()->queryImageTimeStampAcordId(addFriendResponseData.m_strMyId);
+            addFriendNotifyData.m_strName1=userInfoTable.queryUserNameAcordId(addFriendResponseData.m_strFriendId);
+            addFriendNotifyData.m_strName2=userInfoTable.queryUserNameAcordId(addFriendResponseData.m_strMyId);
+            userInfoTable.queryImageTimeStampAcordId(addFriendResponseData.m_strFriendId,addFriendNotifyData.m_strImageStamp1);
+            userInfoTable.queryImageTimeStampAcordId(addFriendResponseData.m_strMyId,addFriendNotifyData.m_strImageStamp2);
             auto sendStr=addFriendNotifyData.generateJson();
             //通知到好友
             //查看好友是否在线，在线就通知
-            if(MysqlQuery::Instance()->queryUserIsOnline(addFriendResponseData.m_strFriendId))
+            if(userInfoTable.queryUserIsOnline(addFriendResponseData.m_strFriendId))
             {
                 m_ptrChatServer->transferMessage(atoi(addFriendResponseData.m_strFriendId.c_str()),sendStr);
             }
@@ -597,17 +605,20 @@ namespace net
         read_json(ss,pt);
         AddFriendRequestJsonData addFriendRequestData(message);
         //查看用户是否存在
-        if(MysqlQuery::Instance()->queryUserIsExist(addFriendRequestData.m_strFriendId))
+        database::UserInfoTable userInfoTable;
+        if(userInfoTable.queryUserIsExist(addFriendRequestData.m_strFriendId))
         {
-            if(MysqlQuery::Instance()->queryUserIsOnline(addFriendRequestData.m_strFriendId))
+            if(userInfoTable.queryUserIsOnline(addFriendRequestData.m_strFriendId))
             {
                 //如果在线，就直接转发消息就行了
                 auto msg=message;
                 m_ptrChatServer->transferMessage(atoi(addFriendRequestData.m_strFriendId.c_str()),msg);
 
                 //把头像也发送过去
-                auto imagePath=MysqlQuery::Instance()->queryImagePathAcordId(addFriendRequestData.m_strMyId);
-                std::string timeStamp=MysqlQuery::Instance()->queryImageTimeStampAcordId(addFriendRequestData.m_strMyId);
+                std::string imagePath="";
+                userInfoTable.queryImagePathAcordId(addFriendRequestData.m_strMyId,imagePath);
+                std::string timeStamp="";
+                userInfoTable.queryImageTimeStampAcordId(addFriendRequestData.m_strMyId,timeStamp);
                 std::string suffix=imagePath.substr(imagePath.find_last_of('.') + 1);//获取文件后缀
                 boost::uuids::uuid uid = boost::uuids::random_generator()();
                 const std::string uid_str = boost::uuids::to_string(uid);
@@ -688,7 +699,9 @@ namespace net
             //将图片保存到本地，并将图片的路径保存到数据库中
             std::string curPath=getCurrentDir();
             //TODO从数据库获取上次的路径，删除上次的图片
-            std::string oldPath=MysqlQuery::Instance()->queryImagePathAcordId(profileImageMsgData.m_strId);
+            database::UserInfoTable userInfoTable;
+            std::string oldPath="";
+            userInfoTable.queryImagePathAcordId(profileImageMsgData.m_strId,oldPath);
             if(oldPath!="")
             {
                 remove(oldPath.c_str());
@@ -703,7 +716,7 @@ namespace net
             else{
                 _LOG(Logcxx::Level::ERROR,"保存头像时，打开文件失败");
             }
-            MysqlQuery::Instance()->updateImagePathAcordId(profileImageMsgData.m_strId,curPath,profileImageMsgData.m_strTimeStamp);
+            userInfoTable.updateImagePathAcordId(profileImageMsgData.m_strId,curPath,profileImageMsgData.m_strTimeStamp);
             m_mapImageUUIDAndBase64.erase(profileImageMsgData.m_strUUID);
             m_mapImageUUIDAndSegment.erase(profileImageMsgData.m_strUUID);
             //TODO 回复一个发送成功的消息
@@ -716,8 +729,11 @@ namespace net
         std::stringstream ss(message);
         read_json(ss,pt);
         GetProfileImageJsonData getFriendProfileImageJsonData(message);
-        std::string imagePath=MysqlQuery::Instance()->queryImagePathAcordId(getFriendProfileImageJsonData.m_strId);
-        std::string timeStamp=MysqlQuery::Instance()->queryImageTimeStampAcordId(getFriendProfileImageJsonData.m_strId);
+        database::UserInfoTable userInfoTable;
+        std::string imagePath="";
+        userInfoTable.queryImagePathAcordId(getFriendProfileImageJsonData.m_strId,imagePath);
+        std::string timeStamp="";
+        userInfoTable.queryImageTimeStampAcordId(getFriendProfileImageJsonData.m_strId,timeStamp);
         std::string suffix=imagePath.substr(imagePath.find_last_of('.') + 1);//获取文件后缀
         //printf("id:%s,timestamp:%s,suffix:%s",getFriendProfileImageJsonData.m_strId.c_str(),timeStamp.c_str(),suffix.c_str());
         boost::uuids::uuid uid = boost::uuids::random_generator()();

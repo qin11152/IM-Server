@@ -47,62 +47,62 @@ void MysqlQuery::initMysql()
     mysql_query(m_mysql,"set names utf-8");
 }
 
-int MysqlQuery::GetCurrentUserCount()
-{
-    std::string query="select count(*) from user_info";
-    if(mysql_query(m_mysql,query.c_str()))
-    {
-        _LOG(Logcxx::ERROR,"select count(*) from user_info failed");
-    }
-    m_mysqlQueryResult=mysql_store_result(m_mysql);
-    m_mysqlRow=mysql_fetch_row(m_mysqlQueryResult);
-    int tmp=atoi(m_mysqlRow[0]);
-    mysql_free_result(m_mysqlQueryResult);
-    return tmp;
-}
+// int MysqlQuery::GetCurrentUserCount()
+// {
+//     std::string query="select count(*) from user_info";
+//     if(mysql_query(m_mysql,query.c_str()))
+//     {
+//         _LOG(Logcxx::ERROR,"select count(*) from user_info failed");
+//     }
+//     m_mysqlQueryResult=mysql_store_result(m_mysql);
+//     m_mysqlRow=mysql_fetch_row(m_mysqlQueryResult);
+//     int tmp=atoi(m_mysqlRow[0]);
+//     mysql_free_result(m_mysqlQueryResult);
+//     return tmp;
+// }
 
-int MysqlQuery::InsertNewUser(const std::string name,const std::string&password,
-                            const std::string iconUrl,const std::string& signature)
-{
-    //std::string exePahth=getCurrentDir();
-    //刚开始时默认头像就是设定的那个图片
-    std::string profileImagePath="./data/profileImage/DefaultImage.jpg";
-    //获取当前时间转换为字符串
-    std::string time=getCurrentTime();
-    int id=GetCurrentUserCount()+1;
-    std::string query="insert into user_info (id,password,name,signature,icon,online,image,imagetimestamp) values("
-    +std::to_string(id)+",\""+password+"\",\""+name+"\",\""+signature+
-    "\",\""+iconUrl+"\",false,\""+profileImagePath+"\",\""+time+"\");";
-    if(mysql_query(m_mysql,query.c_str()))
-    {
-        _LOG(Logcxx::ERROR,"insert into user_info failed,query is:%s",query.c_str());
-        return -1;
-    }
-    return id;
-}
+// int MysqlQuery::InsertNewUser(const std::string name,const std::string&password,
+//                             const std::string iconUrl,const std::string& signature)
+// {
+//     //std::string exePahth=getCurrentDir();
+//     //刚开始时默认头像就是设定的那个图片
+//     std::string profileImagePath="./data/profileImage/DefaultImage.jpg";
+//     //获取当前时间转换为字符串
+//     std::string time=getCurrentTime();
+//     int id=GetCurrentUserCount()+1;
+//     std::string query="insert into user_info (id,password,name,signature,icon,online,image,imagetimestamp) values("
+//     +std::to_string(id)+",\""+password+"\",\""+name+"\",\""+signature+
+//     "\",\""+iconUrl+"\",false,\""+profileImagePath+"\",\""+time+"\");";
+//     if(mysql_query(m_mysql,query.c_str()))
+//     {
+//         _LOG(Logcxx::ERROR,"insert into user_info failed,query is:%s",query.c_str());
+//         return -1;
+//     }
+//     return id;
+// }
 
-bool MysqlQuery::VertifyPassword(int id,const std::string& password)
-{
-    std::string query="select * from user_info";
-    if(mysql_query(m_mysql,query.c_str()))
-    {
-        _LOG(Logcxx::ERROR,"select * from user_info failed");
-        return false;
-    }
-    m_mysqlQueryResult=mysql_store_result(m_mysql);
-    m_mysqlRow=mysql_fetch_row(m_mysqlQueryResult);
-    if(m_mysqlRow[1]==password)
-    {
-        mysql_free_result(m_mysqlQueryResult);
-        return true;
-    }
-    else
-    {
-        mysql_free_result(m_mysqlQueryResult);
-        return false;
-    }
+// bool MysqlQuery::VertifyPassword(int id,const std::string& password)
+// {
+//     std::string query="select * from user_info";
+//     if(mysql_query(m_mysql,query.c_str()))
+//     {
+//         _LOG(Logcxx::ERROR,"select * from user_info failed");
+//         return false;
+//     }
+//     m_mysqlQueryResult=mysql_store_result(m_mysql);
+//     m_mysqlRow=mysql_fetch_row(m_mysqlQueryResult);
+//     if(m_mysqlRow[1]==password)
+//     {
+//         mysql_free_result(m_mysqlQueryResult);
+//         return true;
+//     }
+//     else
+//     {
+//         mysql_free_result(m_mysqlQueryResult);
+//         return false;
+//     }
     
-}
+// }
 
 bool MysqlQuery::AddFriend(std::string friend_1,std::string friend_2,std::string friend1name,std::string friend2name)
 {
@@ -121,79 +121,79 @@ bool MysqlQuery::AddFriend(std::string friend_1,std::string friend_2,std::string
     return true;
 }
 
-bool MysqlQuery::queryUserIsOnline(std::string userId)
-{
-    bool onlineState={false};
-    std::string query="select online from user_info where id="+userId;
-    if(mysql_query(m_mysql,query.c_str()))
-    {
-        _LOG(Logcxx::ERROR,"insert into friend_info failed,query is:%s",query.c_str());
-        return false;
-    }
-    MYSQL_RES* res=nullptr;
-    //将查询的结果存储在res中
-    res=mysql_store_result(m_mysql);
-    //获取结果中的行数
-    int rowCount=mysql_num_rows(res);
-    //获取结果中的列数
-    int colCount=mysql_num_fields(res);
+// bool MysqlQuery::queryUserIsOnline(std::string userId)
+// {
+//     bool onlineState={false};
+//     std::string query="select online from user_info where id="+userId;
+//     if(mysql_query(m_mysql,query.c_str()))
+//     {
+//         _LOG(Logcxx::ERROR,"insert into friend_info failed,query is:%s",query.c_str());
+//         return false;
+//     }
+//     MYSQL_RES* res=nullptr;
+//     //将查询的结果存储在res中
+//     res=mysql_store_result(m_mysql);
+//     //获取结果中的行数
+//     int rowCount=mysql_num_rows(res);
+//     //获取结果中的列数
+//     int colCount=mysql_num_fields(res);
 
-    //当还有列的时候就一直获取
-    //获取行
-    MYSQL_ROW rowPtr=nullptr;
-    //有就一直获取
-    while(rowPtr=mysql_fetch_row(res))
-    {
-        //可以通过循环获取每一行的内容，每一行中
-        //列的名称在上边已经进行了获取
-        //这里只有一行一列
-        int tmpi=atoi(rowPtr[0]);
-        onlineState=tmpi==0?false:true;
-    }
-    mysql_free_result(res);
-    return onlineState;
-}
+//     //当还有列的时候就一直获取
+//     //获取行
+//     MYSQL_ROW rowPtr=nullptr;
+//     //有就一直获取
+//     while(rowPtr=mysql_fetch_row(res))
+//     {
+//         //可以通过循环获取每一行的内容，每一行中
+//         //列的名称在上边已经进行了获取
+//         //这里只有一行一列
+//         int tmpi=atoi(rowPtr[0]);
+//         onlineState=tmpi==0?false:true;
+//     }
+//     mysql_free_result(res);
+//     return onlineState;
+// }
 
-bool MysqlQuery::updateUserOnlineState(std::string userId,bool onlineState)
-{
-    std::string strOnlineState=onlineState?"1":"0";
-    std::string query="update user_info set online="+strOnlineState+" where id="+userId;
-    if(mysql_query(m_mysql,query.c_str()))
-    {
-        _LOG(Logcxx::ERROR,"update user_info set online failed,query is:%s",query.c_str());
-        return false;
-    }
-    return true;
-}
+// bool MysqlQuery::updateUserOnlineState(std::string userId,bool onlineState)
+// {
+//     std::string strOnlineState=onlineState?"1":"0";
+//     std::string query="update user_info set online="+strOnlineState+" where id="+userId;
+//     if(mysql_query(m_mysql,query.c_str()))
+//     {
+//         _LOG(Logcxx::ERROR,"update user_info set online failed,query is:%s",query.c_str());
+//         return false;
+//     }
+//     return true;
+// }
 
-bool MysqlQuery::queryUserIsExist(std::string userId)
-{
-    bool isExist=false;
-    std::string query="select count(*) from user_info where id="+userId;
-    if(mysql_query(m_mysql,query.c_str()))
-    {
-        _LOG(Logcxx::ERROR,"select count(*) from user_info failed,query is:%s",query.c_str());
-        return false;
-    }
-    MYSQL_RES* res=nullptr;
-    //将查询的结果存储在res中
-    res=mysql_store_result(m_mysql);
-    //获取结果中的行数
-    int rowCount=mysql_num_rows(res);
+// bool MysqlQuery::queryUserIsExist(std::string userId)
+// {
+//     bool isExist=false;
+//     std::string query="select count(*) from user_info where id="+userId;
+//     if(mysql_query(m_mysql,query.c_str()))
+//     {
+//         _LOG(Logcxx::ERROR,"select count(*) from user_info failed,query is:%s",query.c_str());
+//         return false;
+//     }
+//     MYSQL_RES* res=nullptr;
+//     //将查询的结果存储在res中
+//     res=mysql_store_result(m_mysql);
+//     //获取结果中的行数
+//     int rowCount=mysql_num_rows(res);
 
-    //获取行
-    MYSQL_ROW rowPtr=nullptr;
-    //有就一直获取
-    while(rowPtr=mysql_fetch_row(res))
-    {
-        //可以通过循环获取每一行的内容，每一行中
-        //列的名称在上边已经进行了获取
-        //这里只有一行一列
-        isExist=rowPtr[0]==0?false:true;
-    }
-    mysql_free_result(res);
-    return isExist;
-}
+//     //获取行
+//     MYSQL_ROW rowPtr=nullptr;
+//     //有就一直获取
+//     while(rowPtr=mysql_fetch_row(res))
+//     {
+//         //可以通过循环获取每一行的内容，每一行中
+//         //列的名称在上边已经进行了获取
+//         //这里只有一行一列
+//         isExist=rowPtr[0]==0?false:true;
+//     }
+//     mysql_free_result(res);
+//     return isExist;
+// }
 
 bool MysqlQuery::insertAddFriendCache(const std::string& requestId,const std::string& destinationId,const std::string& verifyMsg)
 {
@@ -371,113 +371,113 @@ void MysqlQuery::queryUserFrinedList(std::vector<FriendInfo>& vecFriendList,std:
     return;
 }
 
-std::string MysqlQuery::queryUserNameAcordId(const std::string& id)
-{
-    std::string query="select name from user_info where id="+id;
-    if(mysql_query(m_mysql,query.c_str()))
-    {
-        _LOG(Logcxx::ERROR,"select name from user_info failed,query is:%s",query.c_str());
-        return "";
-    }
-    std::string name="";
-    MYSQL_RES* res=nullptr;
-    //将查询的结果存储在res中
-    res=mysql_store_result(m_mysql);
-    //获取结果中的行数
-    int rowCount=mysql_num_rows(res);
+// std::string MysqlQuery::queryUserNameAcordId(const std::string& id)
+// {
+//     std::string query="select name from user_info where id="+id;
+//     if(mysql_query(m_mysql,query.c_str()))
+//     {
+//         _LOG(Logcxx::ERROR,"select name from user_info failed,query is:%s",query.c_str());
+//         return "";
+//     }
+//     std::string name="";
+//     MYSQL_RES* res=nullptr;
+//     //将查询的结果存储在res中
+//     res=mysql_store_result(m_mysql);
+//     //获取结果中的行数
+//     int rowCount=mysql_num_rows(res);
 
-    //获取行
-    MYSQL_ROW rowPtr=nullptr;
-    //有就一直获取
-    while(rowPtr=mysql_fetch_row(res))
-    {
-        if(rowPtr[0]!=nullptr)
-        {
-            name=rowPtr[0];
-        }
-    }
-    mysql_free_result(res);
-    return name;
-}
+//     //获取行
+//     MYSQL_ROW rowPtr=nullptr;
+//     //有就一直获取
+//     while(rowPtr=mysql_fetch_row(res))
+//     {
+//         if(rowPtr[0]!=nullptr)
+//         {
+//             name=rowPtr[0];
+//         }
+//     }
+//     mysql_free_result(res);
+//     return name;
+// }
 
-bool MysqlQuery::updateImagePathAcordId(const std::string& id,const std::string strIamgePath,const std::string& timeStamp)
-{
-    //std::string curTime=getCurrentTime();
-    std::string query="update user_info set image=\'"+strIamgePath+"\', imagetimestamp=\'"+timeStamp+"\' where id="+id; 
-    if(mysql_query(m_mysql,query.c_str()))
-    {
-        _LOG(Logcxx::ERROR,"update user image failed,query is:%s",query.c_str());
-        return false;
-    }
-    return true;
-}
+// bool MysqlQuery::updateImagePathAcordId(const std::string& id,const std::string strIamgePath,const std::string& timeStamp)
+// {
+//     //std::string curTime=getCurrentTime();
+//     std::string query="update user_info set image=\'"+strIamgePath+"\', imagetimestamp=\'"+timeStamp+"\' where id="+id; 
+//     if(mysql_query(m_mysql,query.c_str()))
+//     {
+//         _LOG(Logcxx::ERROR,"update user image failed,query is:%s",query.c_str());
+//         return false;
+//     }
+//     return true;
+// }
 
-std::string MysqlQuery::queryImagePathAcordId(const std::string& id)
-{
-    std::string query="select image from user_info where id="+id;
-    if(mysql_query(m_mysql,query.c_str()))
-    {
-        _LOG(Logcxx::ERROR,"select image from user_info failed,query is:%s",query.c_str());
-        return "";
-    }
-    std::string image="";
-    MYSQL_RES* res=nullptr;
-    //将查询的结果存储在res中
-    res=mysql_store_result(m_mysql);
-    //获取结果中的行数
-    int rowCount=mysql_num_rows(res);
+// std::string MysqlQuery::queryImagePathAcordId(const std::string& id)
+// {
+//     std::string query="select image from user_info where id="+id;
+//     if(mysql_query(m_mysql,query.c_str()))
+//     {
+//         _LOG(Logcxx::ERROR,"select image from user_info failed,query is:%s",query.c_str());
+//         return "";
+//     }
+//     std::string image="";
+//     MYSQL_RES* res=nullptr;
+//     //将查询的结果存储在res中
+//     res=mysql_store_result(m_mysql);
+//     //获取结果中的行数
+//     int rowCount=mysql_num_rows(res);
 
-    //获取行
-    MYSQL_ROW rowPtr=nullptr;
-    //有就一直获取
-    while(rowPtr=mysql_fetch_row(res))
-    {
-        //可以通过循环获取每一行的内容，每一行中
-        //列的名称在上边已经进行了获取
-        //这里只有一行一列
-        if(rowPtr[0]!=nullptr)
-        {
-            image=rowPtr[0];
-        }
-    }
-    mysql_free_result(res);
-    return image;
-}
+//     //获取行
+//     MYSQL_ROW rowPtr=nullptr;
+//     //有就一直获取
+//     while(rowPtr=mysql_fetch_row(res))
+//     {
+//         //可以通过循环获取每一行的内容，每一行中
+//         //列的名称在上边已经进行了获取
+//         //这里只有一行一列
+//         if(rowPtr[0]!=nullptr)
+//         {
+//             image=rowPtr[0];
+//         }
+//     }
+//     mysql_free_result(res);
+//     return image;
+// }
 
-/**
- * @brief 查询用户的头像时间戳
- * 
- * @param id 用户id
- * @return std::string 
- */
-std::string MysqlQuery::queryImageTimeStampAcordId(const std::string & id)
-{
-    std::string query="select imagetimestamp from user_info where id="+id;
-    if(mysql_query(m_mysql,query.c_str()))
-    {
-        _LOG(Logcxx::ERROR,"select imagetimestamp from user_info failed,query is:%s",query.c_str());
-        return "";
-    }
-    std::string imageTimeStamp="";
-    MYSQL_RES* res=nullptr;
-    //将查询的结果存储在res中
-    res=mysql_store_result(m_mysql);
-    //获取结果中的行数
-    int rowCount=mysql_num_rows(res);
+// /**
+//  * @brief 查询用户的头像时间戳
+//  * 
+//  * @param id 用户id
+//  * @return std::string 
+//  */
+// std::string MysqlQuery::queryImageTimeStampAcordId(const std::string & id)
+// {
+//     std::string query="select imagetimestamp from user_info where id="+id;
+//     if(mysql_query(m_mysql,query.c_str()))
+//     {
+//         _LOG(Logcxx::ERROR,"select imagetimestamp from user_info failed,query is:%s",query.c_str());
+//         return "";
+//     }
+//     std::string imageTimeStamp="";
+//     MYSQL_RES* res=nullptr;
+//     //将查询的结果存储在res中
+//     res=mysql_store_result(m_mysql);
+//     //获取结果中的行数
+//     int rowCount=mysql_num_rows(res);
 
-    //获取行
-    MYSQL_ROW rowPtr=nullptr;
-    //有就一直获取
-    while(rowPtr=mysql_fetch_row(res))
-    {
-        if(rowPtr[0]!=nullptr)
-        {
-            imageTimeStamp=rowPtr[0];
-        }
-    }
-    mysql_free_result(res);
-    return imageTimeStamp;
-}
+//     //获取行
+//     MYSQL_ROW rowPtr=nullptr;
+//     //有就一直获取
+//     while(rowPtr=mysql_fetch_row(res))
+//     {
+//         if(rowPtr[0]!=nullptr)
+//         {
+//             imageTimeStamp=rowPtr[0];
+//         }
+//     }
+//     mysql_free_result(res);
+//     return imageTimeStamp;
+// }
 
 std::string MysqlQuery::getCurGroupId()
 {

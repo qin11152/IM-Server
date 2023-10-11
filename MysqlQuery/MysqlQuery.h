@@ -2,7 +2,7 @@
  * @Author: qin11152 1052080761@qq.com
  * @Date: 2022-06-18 13:57:30
  * @LastEditors: qin11152 1052080761@qq.com
- * @LastEditTime: 2023-03-12 18:32:57
+ * @LastEditTime: 2023-10-11 21:38:50
  * @FilePath: /src/IM-Server/MysqlQuery/MysqlQuery.h
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -29,16 +29,16 @@ class MysqlQuery
         static std::shared_ptr<MysqlQuery> Instance();
         ~MysqlQuery();
         //将新注册的用户插入数据库中
-        int InsertNewUser(const std::string name,const std::string&password,
-                            const std::string iconUrl,const std::string& signature="");
+        //int InsertNewUser(const std::string name,const std::string&password,
+                            //const std::string iconUrl,const std::string& signature="");
         /**
          * @description: 验证用户名和密码是否正确
          * @param {std::string} name
          * @param {std::string} password
          * @return {*}
          */
-        bool VertifyPassword(int id,const std::string& password);
-        int GetCurrentUserCount();
+        //bool VertifyPassword(int id,const std::string& password);
+        //int GetCurrentUserCount();
         //向数据库添加好友
         /*
         *param friend_1:插入到数据库的id_my
@@ -47,11 +47,11 @@ class MysqlQuery
         */
         bool AddFriend(std::string friend_1,std::string friend_2,std::string friend1name,std::string friend2name);
         //查询用户是否在线
-        bool queryUserIsOnline(std::string userId);
+        //bool queryUserIsOnline(std::string userId);
         //修改用户在线状态
-        bool updateUserOnlineState(std::string userId,bool onlineState);
+        //bool updateUserOnlineState(std::string userId,bool onlineState);
         //查询用户是否存在
-        bool queryUserIsExist(std::string userId);
+        //bool queryUserIsExist(std::string userId);
         //把添加好友的信息缓存起来
         bool insertAddFriendCache(const std::string& requestId,const std::string& destinationId,const std::string& verifyMsg);
         //从数据库中得到缓存的添加好友的消息
@@ -67,16 +67,16 @@ class MysqlQuery
         //把获取的好友列表信息存储在vector中
         void queryUserFrinedList(std::vector<FriendInfo>& vecFriendList,std::string& strUserId);
         //根据id查找名称
-        std::string queryUserNameAcordId(const std::string &id);
+        //std::string queryUserNameAcordId(const std::string &id);
         //根据id插入图片到数据库中
-        bool updateImagePathAcordId(const std::string& id,const std::string strIamgePath,const std::string& timeStamp);
+        //bool updateImagePathAcordId(const std::string& id,const std::string strIamgePath,const std::string& timeStamp);
         //获取头像图片的路径
-        std::string queryImagePathAcordId(const std::string& id);
+        //std::string queryImagePathAcordId(const std::string& id);
         /**
          * @brief 根据id获取头像时间戳
          * 
          */
-        std::string queryImageTimeStampAcordId(const std::string& id);
+        //std::string queryImageTimeStampAcordId(const std::string& id);
 
         std::string getCurGroupId();
 

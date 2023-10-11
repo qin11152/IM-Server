@@ -2,7 +2,7 @@
  * @Author: qin11152 1052080761@qq.com
  * @Date: 2022-06-18 13:57:30
  * @LastEditors: qin11152 1052080761@qq.com
- * @LastEditTime: 2023-05-14 15:58:49
+ * @LastEditTime: 2023-10-11 22:02:07
  * @FilePath: /IM-Server/ChatServer/ChatServer.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE/
  */
@@ -38,7 +38,8 @@ namespace net
 
     void ChatServer::removeDisconnetedClient(int id,std::shared_ptr<ChatClient> ptr)
     {
-        MysqlQuery::Instance()->updateUserOnlineState(std::to_string(id),false);
+        database::UserInfoTable userInfoTable;
+        userInfoTable.updateUserOnlineState(std::to_string(id),false);
         if(m_idMap.find(id)!=m_idMap.end())
         {
             m_idMap.erase(id);

@@ -1,3 +1,11 @@
+/*
+ * @Author: qin11152 1052080761@qq.com
+ * @Date: 2023-10-11 21:21:27
+ * @LastEditors: qin11152 1052080761@qq.com
+ * @LastEditTime: 2023-10-11 21:30:18
+ * @FilePath: /IM-Server/MysqlQuery/DataBaseOperate.cpp
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 #include "DataBaseOperate.h"
 #include "module/Log.h"
 #include "../PublicFunction.hpp"
@@ -27,6 +35,11 @@ namespace database
         return m_ptrInstance;
     }
 
+    DataBaseOperate::~DataBaseOperate()
+    {
+        mysql_close(m_mysql);
+    }
+
     DataBaseOperate::DataBaseOperate(const char* ip,const char* database,const char* user,const char*password):
         m_destinationIp(ip),
         m_destinationDatabase(database),
@@ -53,7 +66,7 @@ namespace database
 
     bool DataBaseOperate::execQuery(const char *query, MYSQL_RES* result)
     {
-         if(mysql_query(m_mysql,query.c_str()))
+         if(mysql_query(m_mysql,query))
         {
             _LOG(Logcxx::ERROR,"select count(*) from user_info failed");
             return false;
