@@ -68,7 +68,7 @@ namespace net
         }
         else 
         {
-            _LOG(Logcxx::ERROR,"when transfer message couldn't find id,id:%d",id);
+            _LOG(Logcxx::Level::ERRORS,"when transfer message couldn't find id,id:%d",id);
         }
         return true;
     }

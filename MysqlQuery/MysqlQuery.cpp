@@ -40,7 +40,7 @@ void MysqlQuery::initMysql()
     mysql_real_connect(m_mysql,m_destinationIp.c_str(),m_destinationUser.c_str(),
     m_destinationPassword.c_str(),m_destinationDatabase.c_str(),0,NULL,0);
     if(m_mysql==NULL){
-        _LOG(Logcxx::ERROR,"error occurs: %s",mysql_error(m_mysql));
+        _LOG(Logcxx::Level::ERRORS,"error occurs: %s",mysql_error(m_mysql));
     }else{
         //printf("connect successfully\n");
     }
@@ -109,13 +109,13 @@ bool MysqlQuery::AddFriend(std::string friend_1,std::string friend_2,std::string
     std::string query="insert into friend_info values(\""+friend_1+"\",\""+friend_2+"\",\""+friend2name+"\")";
     if(mysql_query(m_mysql,query.c_str()))
     {
-        _LOG(Logcxx::ERROR,"insert into friend_info failed,query is:%s",query.c_str());
+        _LOG(Logcxx::Level::ERRORS,"insert into friend_info failed,query is:%s",query.c_str());
         return false;
     }
     query="insert into friend_info values(\""+friend_2+"\",\""+friend_1+"\",\""+friend1name+"\")";
     if(mysql_query(m_mysql,query.c_str()))
     {
-        _LOG(Logcxx::ERROR,"insert into friend_info failed,query is:%s",query.c_str());
+        _LOG(Logcxx::Level::ERRORS,"insert into friend_info failed,query is:%s",query.c_str());
         return false;
     } 
     return true;
@@ -200,7 +200,7 @@ bool MysqlQuery::insertAddFriendCache(const std::string& requestId,const std::st
     std::string query="insert into add_friend values(\""+requestId+"\",\""+destinationId+"\",\""+verifyMsg+"\")";
     if(mysql_query(m_mysql,query.c_str()))
     {
-        _LOG(Logcxx::ERROR,"insert into add_friend failed,query is:%s",query.c_str());
+        _LOG(Logcxx::Level::ERRORS,"insert into add_friend failed,query is:%s",query.c_str());
         return false;
     }
     return true;
@@ -211,7 +211,7 @@ bool MysqlQuery::queryCachedAddFriendInfo(std::vector<MyAddFriendInfo>& vecFried
     std::string query="select * from add_friend where myId=\""+id+"\"";
     if(mysql_query(m_mysql,query.c_str()))
     {
-        _LOG(Logcxx::ERROR,"select * from add_friend failed,query is:%s",query.c_str());
+        _LOG(Logcxx::Level::ERRORS,"select * from add_friend failed,query is:%s",query.c_str());
         return false;
     }
 
@@ -254,7 +254,7 @@ bool MysqlQuery::deleteCachedAddFriendInfo(std::string& id)
     std::string query="delete from add_friend where myId=\""+id+"\"";
     if(!mysql_query(m_mysql,query.c_str()))
     {
-        _LOG(Logcxx::ERROR,"delete from add_friend failed,query is:%s",query.c_str());
+        _LOG(Logcxx::Level::ERRORS,"delete from add_friend failed,query is:%s",query.c_str());
         return false;
     }
     return true;
@@ -265,7 +265,7 @@ bool MysqlQuery::queryCachedChatMsg(std::vector<MyChatMessageInfo>& vecFriednInf
     std::string query="select * from chat_message_cache where toid=\""+id+"\"";
     if(mysql_query(m_mysql,query.c_str()))
     {
-        _LOG(Logcxx::ERROR,"select * from chat_message_cache failed,query is:%s",query.c_str());
+        _LOG(Logcxx::Level::ERRORS,"select * from chat_message_cache failed,query is:%s",query.c_str());
         return false;
     }
 
@@ -309,7 +309,7 @@ bool MysqlQuery::insertCachedChatMsg(std::string& fromId,std::string& toId,std::
     std::string query="insert into chat_message_cache values(\""+fromId+"\",\""+toId+"\",\""+msg+"\",\""+sendName+"\",\""+time+"\")";
     if(mysql_query(m_mysql,query.c_str()))
     {
-        _LOG(Logcxx::ERROR,"insert into chat_message_cache failed,query is:%s",query.c_str());
+        _LOG(Logcxx::Level::ERRORS,"insert into chat_message_cache failed,query is:%s",query.c_str());
         return false;
     }
     return true;
@@ -320,7 +320,7 @@ bool MysqlQuery::deleteCachedChatMsg(std::string& id)
     std::string query="delete from chat_message_cache where toId=\""+id+"\"";
     if(mysql_query(m_mysql,query.c_str()))
     {
-        _LOG(Logcxx::ERROR,"delete from chat_message_cache failed,query is:%s",query.c_str());
+        _LOG(Logcxx::Level::ERRORS,"delete from chat_message_cache failed,query is:%s",query.c_str());
         return false;
     }
     return true;
@@ -333,7 +333,7 @@ void MysqlQuery::queryUserFrinedList(std::vector<FriendInfo>& vecFriendList,std:
     std::string query="SELECT a.id_friend, a.name, b.imagetimestamp from friend_info as a inner JOIN user_info as b on (a.id_friend=b.id and a.id_my=\""+strUserId+"\") order by CONVERT( a.`name` USING gbk) COLLATE gbk_chinese_ci DESC;";
     if(mysql_query(m_mysql,query.c_str()))
     {
-        _LOG(Logcxx::ERROR,"select id_friend, name from friend_info failed,query is:%s",query.c_str());
+        _LOG(Logcxx::Level::ERRORS,"select id_friend, name from friend_info failed,query is:%s",query.c_str());
         return;
     }
 
@@ -484,7 +484,7 @@ std::string MysqlQuery::getCurGroupId()
     std::string query="select count(*) from group_properities";
     if(mysql_query(m_mysql,query.c_str()))
     {
-        _LOG(Logcxx::ERROR,"select max(id) from group_properities failed,query is:%s",query.c_str());
+        _LOG(Logcxx::Level::ERRORS,"select max(id) from group_properities failed,query is:%s",query.c_str());
         return "";
     }
     std::string groupId="";

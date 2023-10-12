@@ -56,7 +56,7 @@ namespace database
         m_destinationPassword.c_str(),m_destinationDatabase.c_str(),0,NULL,0);
         if(m_mysql==NULL)
         {
-            _LOG(Logcxx::ERROR,"error occurs: %s",mysql_error(m_mysql));
+            _LOG(Logcxx::Level::ERRORS,"error occurs: %s",mysql_error(m_mysql));
         }else
         {
             //printf("connect successfully\n");
@@ -68,7 +68,7 @@ namespace database
     {
          if(mysql_query(m_mysql,query))
         {
-            _LOG(Logcxx::ERROR,"select count(*) from user_info failed");
+            _LOG(Logcxx::Level::ERRORS,"select count(*) from user_info failed");
             return false;
         }
         result=mysql_store_result(m_mysql);

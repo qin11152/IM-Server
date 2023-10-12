@@ -22,7 +22,7 @@ namespace database
         MYSQL_RES* result=nullptr;
         if(DataBaseOperate::Instance()->execQuery(query.c_str(),result))
         {
-            _LOG(Logcxx::ERROR,"insert into user_info failed,query is:%s",query.c_str());
+            _LOG(Logcxx::Level::ERRORS,"insert into user_info failed,query is:%s",query.c_str());
             return false;
         }
         mysql_free_result(result);
@@ -35,7 +35,7 @@ namespace database
         std::string query="select * from user_info";
         if(DataBaseOperate::Instance()->execQuery(query.c_str(),result))
         {
-            _LOG(Logcxx::ERROR,"select * from user_info failed");
+            _LOG(Logcxx::Level::ERRORS,"select * from user_info failed");
             return false;
         }
         auto mysqlRow=mysql_fetch_row(result);
@@ -57,7 +57,7 @@ namespace database
         std::string query="select count(*) from user_info";
         if(DataBaseOperate::Instance()->execQuery(query.c_str(),result))
         {
-            _LOG(Logcxx::ERROR,"select count(*) from user_info failed");
+            _LOG(Logcxx::Level::ERRORS,"select count(*) from user_info failed");
             return false;
         }
         auto mysqlRow=mysql_fetch_row(result);
@@ -73,7 +73,7 @@ namespace database
         std::string query="select online from user_info where id="+userId;
         if(DataBaseOperate::Instance()->execQuery(query.c_str(),result))
         {
-            _LOG(Logcxx::ERROR,"insert into friend_info failed,query is:%s",query.c_str());
+            _LOG(Logcxx::Level::ERRORS,"insert into friend_info failed,query is:%s",query.c_str());
             return false;
         }
         //获取结果中的行数
@@ -104,7 +104,7 @@ namespace database
         std::string query="update user_info set online="+strOnlineState+" where id="+userId;
         if(DataBaseOperate::Instance()->execQuery(query.c_str(),result))
         {
-            _LOG(Logcxx::ERROR,"update user_info set online failed,query is:%s",query.c_str());
+            _LOG(Logcxx::Level::ERRORS,"update user_info set online failed,query is:%s",query.c_str());
             return false;
         }
         return true;
@@ -117,7 +117,7 @@ namespace database
         std::string query="select count(*) from user_info where id="+userId;
         if(DataBaseOperate::Instance()->execQuery(query.c_str(),result))
         {
-            _LOG(Logcxx::ERROR,"select count(*) from user_info failed,query is:%s",query.c_str());
+            _LOG(Logcxx::Level::ERRORS,"select count(*) from user_info failed,query is:%s",query.c_str());
             return false;
         }
         //获取结果中的行数
@@ -143,7 +143,7 @@ namespace database
         std::string query="select name from user_info where id="+id;
         if(DataBaseOperate::Instance()->execQuery(query.c_str(),result))
         {
-            _LOG(Logcxx::ERROR,"select name from user_info failed,query is:%s",query.c_str());
+            _LOG(Logcxx::Level::ERRORS,"select name from user_info failed,query is:%s",query.c_str());
             return "";
         }
         std::string name="";
@@ -170,7 +170,7 @@ namespace database
         std::string query="update user_info set image=\'"+strIamgePath+"\', imagetimestamp=\'"+timeStamp+"\' where id="+id; 
         if(DataBaseOperate::Instance()->execQuery(query.c_str(),result))
         {
-            _LOG(Logcxx::ERROR,"update user image failed,query is:%s",query.c_str());
+            _LOG(Logcxx::Level::ERRORS,"update user image failed,query is:%s",query.c_str());
             return false;
         }
         return true;
@@ -182,7 +182,7 @@ namespace database
         std::string query="select image from user_info where id="+id;
         if(DataBaseOperate::Instance()->execQuery(query.c_str(),result))
         {
-            _LOG(Logcxx::ERROR,"select image from user_info failed,query is:%s",query.c_str());
+            _LOG(Logcxx::Level::ERRORS,"select image from user_info failed,query is:%s",query.c_str());
             return false;
         }
         std::string image="";
@@ -212,7 +212,7 @@ namespace database
         std::string query="select imagetimestamp from user_info where id="+id;
         if(DataBaseOperate::Instance()->execQuery(query.c_str(),result))
         {
-            _LOG(Logcxx::ERROR,"select imagetimestamp from user_info failed,query is:%s",query.c_str());
+            _LOG(Logcxx::Level::ERRORS,"select imagetimestamp from user_info failed,query is:%s",query.c_str());
             return false;
         }
         //获取结果中的行数

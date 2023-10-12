@@ -13,7 +13,6 @@
 #include <boost/thread/thread.hpp>
 #include <boost/bind.hpp>
 #include <thread>
-#include <unistd.h>
 
 int main(int argc,char* argv[])
 {
