@@ -253,8 +253,11 @@ namespace net
                         std::string fileName=ss.str()+"."+startGroupChatData.m_strImageSuffix;
                         m_stuRecvImageInfo.m_strImageName=fileName;
                         m_osImageWrite.open(fileName.c_str(),std::ios::binary|std::ios::app);
-
+#if defined(__linux__)
                         char buf[m_endPosOfBuffer]{0};
+#elif defined(WIN32)
+                        char* buf=new char[m_endPosOfBuffer];
+#endif
                         if(m_endPosOfBuffer>0)
                         {
                             memcpy(buf,m_cBuffer,m_endPosOfBuffer);
@@ -263,6 +266,7 @@ namespace net
                             m_stuRecvImageInfo.m_nImageSize-=m_endPosOfBuffer;
                             m_endPosOfBuffer=0;
                         }
+                        delete buf;
                         m_bImageWrite=true;
                         m_timerForStopReceiveImage.expires_after(std::chrono::seconds(5));
                         m_timerForStopReceiveImage.async_wait([this](const std::error_code& ec){
@@ -285,7 +289,7 @@ namespace net
                 //正常断开连接的时候会受到eof,而程序直接关闭，并且不处理socket的时候就会触发104错误
                 if(boost::asio::error::eof!=ec.value())
                 {
-                    _LOG(Logcxx::INFO,"connection dis unnormally,error code:%d",ec.value());
+                    _LOG(Logcxx::Level::INFO,"connection dis unnormally,error code:%d",ec.value());
                 }
                 
                 m_clientSocket.cancel(); 
@@ -326,14 +330,14 @@ namespace net
                 m_ptrChatServer->removeDisconnetedClient(m_iId,self);
             }
         );
-        _LOG(Logcxx::INFO,"enter handle clientMessage: %s",message.c_str());
+        _LOG(Logcxx::Level::INFO,"enter handle clientMessage: %s",message.c_str());
         //传递的消息类型为json格式
         //rapidjson解析json
         rapidjson::Document doc;
         doc.Parse(message.c_str());
         if(doc.HasParseError())
         {
-            _LOG(Logcxx::INFO,"json parse error");
+            _LOG(Logcxx::Level::INFO,"json parse error");
             return;
         }
         //首先获取这次得到的消息的类型
@@ -345,7 +349,7 @@ namespace net
         }
         else
         {
-            _LOG(Logcxx::INFO,"no such message type");
+            _LOG(Logcxx::Level::INFO,"no such message type");
         }
         return;
     }
@@ -376,7 +380,7 @@ namespace net
         doc.Parse(imageJsonData.c_str());
         if(doc.HasParseError())
         {
-            _LOG(Logcxx::INFO,"json parse error");
+            _LOG(Logcxx::Level::INFO,"json parse error");
             return;
         }
         //首先获取这次得到的消息的类型
@@ -388,7 +392,7 @@ namespace net
         }
         else
         {
-            _LOG(Logcxx::INFO,"no such message type");
+            _LOG(Logcxx::Level::INFO,"no such message type");
         }
         return;
     }
@@ -559,7 +563,7 @@ namespace net
                 }
                 else
                 {
-                    _LOG(Logcxx::Level::ERROR,u8"打开文件失败");
+                    _LOG(Logcxx::Level::ERRORS,u8"打开文件失败");
                 }
             }
             else
@@ -652,12 +656,12 @@ namespace net
                     }
                     else
                     {
-                        _LOG(Logcxx::Level::ERROR,u8"打开文件失败");
+                        _LOG(Logcxx::Level::ERRORS,u8"打开文件失败");
                     }
                 }
                 else
                 {
-                    _LOG(Logcxx::Level::ERROR,u8"数据库中没有该用户的头像");
+                    _LOG(Logcxx::Level::ERRORS,u8"数据库中没有该用户的头像");
                 }
             }
             else
@@ -714,7 +718,7 @@ namespace net
                 out.close();
             }
             else{
-                _LOG(Logcxx::Level::ERROR,"保存头像时，打开文件失败");
+                _LOG(Logcxx::Level::ERRORS,"保存头像时，打开文件失败");
             }
             userInfoTable.updateImagePathAcordId(profileImageMsgData.m_strId,curPath,profileImageMsgData.m_strTimeStamp);
             m_mapImageUUIDAndBase64.erase(profileImageMsgData.m_strUUID);
@@ -766,7 +770,7 @@ namespace net
                 }
             }
             else{
-                _LOG(Logcxx::Level::ERROR,"open file failed");
+                _LOG(Logcxx::Level::ERRORS,"open file failed");
             }
         }
         else{

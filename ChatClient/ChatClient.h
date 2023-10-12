@@ -8,6 +8,8 @@
  */
 #pragma once
 
+#include <boost/asio.hpp>
+
 #include "MysqlQuery.h"
 #include "UserInfoTable.h"
 
@@ -15,7 +17,6 @@
 #include <memory>
 #include <type_traits>
 #include <unordered_map>
-#include <boost/asio.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
