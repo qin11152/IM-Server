@@ -121,7 +121,7 @@ namespace net
 
         //读取图片文件并发送出去
         char* imageBuf=new char[size];
-        fread(imageBuf, size, 1, fp);
+        int readImageLen=fread(imageBuf, size, 1, fp);
         fclose(fp);
 
         sends += boost::asio::write(m_clientSocket,boost::asio::buffer(imageBuf, size));
@@ -266,7 +266,10 @@ namespace net
                             m_stuRecvImageInfo.m_nImageSize-=m_endPosOfBuffer;
                             m_endPosOfBuffer=0;
                         }
+#if defined(WIN32)
                         delete buf;
+#endif
+                        
                         m_bImageWrite=true;
                         m_timerForStopReceiveImage.expires_after(std::chrono::seconds(5));
                         m_timerForStopReceiveImage.async_wait([this](const std::error_code& ec){

@@ -2,7 +2,7 @@
  * @Author: qin11152 1052080761@qq.com
  * @Date: 2022-08-11 22:21:05
  * @LastEditors: qin11152 1052080761@qq.com
- * @LastEditTime: 2022-11-20 16:39:19
+ * @LastEditTime: 2023-10-12 20:41:59
  * @FilePath: /src/IM-Server/PublicFunction.hpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -20,7 +20,7 @@ inline std::string getCurrentDir()
     char buf[128]{0};
     //windows下没有getcwd函数，用GetCurrentDirectory代替
     #if defined(__linux__)
-        getcwd(buf,sizeof(buf));
+        auto returnValue=getcwd(buf,sizeof(buf));
     #elif defined(_WIN32)
         GetCurrentDirectory(sizeof(buf),buf);
     #endif
