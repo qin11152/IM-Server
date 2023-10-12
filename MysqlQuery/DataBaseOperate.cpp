@@ -66,7 +66,8 @@ namespace database
 
     bool DataBaseOperate::execQuery(const char *query, MYSQL_RES* result)
     {
-         if(mysql_query(m_mysql,query))
+        std::unique_lock<std::mutex> lck(m_mutexForMysql);
+        if(mysql_query(m_mysql,query))
         {
             _LOG(Logcxx::Level::ERRORS,"select count(*) from user_info failed");
             return false;

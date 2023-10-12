@@ -35,6 +35,7 @@ namespace database
             DataBaseOperate(const char* ip,const char* database,const char* user,const char*password);
             static std::shared_ptr<DataBaseOperate> m_ptrInstance;
             static std::mutex m_mutex;
+            std::mutex m_mutexForMysql;
             MYSQL* m_mysql{nullptr};
             std::string m_destinationIp{""};
             std::string m_destinationDatabase{""};
