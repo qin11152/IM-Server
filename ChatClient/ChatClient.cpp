@@ -472,7 +472,8 @@ namespace net
         else
         {
             //TODO插入数据库中
-            MysqlQuery::Instance()->insertCachedChatMsg(singleChatData.m_strSendUserId,singleChatData.m_strRecvUserId,singleChatData.m_strMessage,singleChatData.m_strSendName,singleChatData.m_strTime);
+            database::ChatMsgCacheTable chatMsgCacheTable;
+            chatMsgCacheTable.insertCachedChatMsg(singleChatData.m_strSendUserId,singleChatData.m_strRecvUserId,singleChatData.m_strMessage,singleChatData.m_strSendName,singleChatData.m_strTime);
         }
     }
     void ChatClient::handleKeepAliveMessage(const std::string &message)
@@ -491,15 +492,17 @@ namespace net
         userInfoTable.updateUserOnlineState(userId,true);
         //查询表获取好友列表，并发送
         GetFriendListReplyData getFriendListReplyData;
-        MysqlQuery::Instance()->queryUserFrinedList(getFriendListReplyData.m_vecFriendList,userId);
+        database::FriendInfoTable friendInfoTable;
+        friendInfoTable.queryUserFrinedList(getFriendListReplyData.m_vecFriendList,userId);
         auto sendStr=getFriendListReplyData.generateJson();
         DoWrite(sendStr,getFriendListReplyData.generateJson().length());
         //TODO推送缓存的聊天消息和添加好友请求
         std::vector<MyAddFriendInfo> vecCachedAddFriend;
-        MysqlQuery::Instance()->queryCachedAddFriendInfo(vecCachedAddFriend,userId);
+        database::AddFriendCacheTable addFriendCacheTable;
+        addFriendCacheTable.queryCachedAddFriendInfo(vecCachedAddFriend,userId);
         if(vecCachedAddFriend.size()>0)
         {
-            MysqlQuery::Instance()->deleteCachedAddFriendInfo(userId);
+            addFriendCacheTable.deleteCachedAddFriendInfo(userId);
         }
         for(auto& item:vecCachedAddFriend)
         {
@@ -511,10 +514,11 @@ namespace net
             DoWrite(tmp.generateJson(),tmp.generateJson().length());
         }
         std::vector<MyChatMessageInfo> vecCachedChatInfo;
-        MysqlQuery::Instance()->queryCachedChatMsg(vecCachedChatInfo,userId);
+        database::ChatMsgCacheTable chatMsgCacheTable;
+        chatMsgCacheTable.queryCachedChatMsg(vecCachedChatInfo,userId);
         if(vecCachedChatInfo.size()>0)
         {
-            MysqlQuery::Instance()->deleteCachedChatMsg(userId);
+             chatMsgCacheTable.deleteCachedChatMsg(userId);
         }
         for(auto & item:vecCachedChatInfo)
         {
@@ -599,7 +603,8 @@ namespace net
             }
             //通知到自己
             DoWrite(sendStr,sendStr.length());
-            MysqlQuery::Instance()->AddFriend(addFriendResponseData.m_strFriendId,addFriendResponseData.m_strMyId,addFriendNotifyData.m_strName1,addFriendNotifyData.m_strName2);
+            database::FriendInfoTable friendInfoTable;
+            friendInfoTable.insertFriendInfo(addFriendResponseData.m_strFriendId,addFriendResponseData.m_strMyId,addFriendNotifyData.m_strName1,addFriendNotifyData.m_strName2);
         }
     }
     void ChatClient::handleAddFriendMessage(const std::string &message)
@@ -667,7 +672,8 @@ namespace net
             else
             {
                 //存储在数据库中，上线后推送
-                MysqlQuery::Instance()->insertAddFriendCache(addFriendRequestData.m_strMyId,addFriendRequestData.m_strFriendId,addFriendRequestData.m_strVerifyMsg);
+                database::AddFriendCacheTable addFriendCacheTable;
+                addFriendCacheTable.insertAddFriendCache(addFriendRequestData.m_strMyId,addFriendRequestData.m_strFriendId,addFriendRequestData.m_strVerifyMsg);
             }
         }
     }
@@ -678,10 +684,11 @@ namespace net
         read_json(ss,pt);
         std::string userId=pt.get<std::string>("UserId");
             //TODO查询表获取好友列表
-            GetFriendListReplyData getFriendListReplyData;
-            MysqlQuery::Instance()->queryUserFrinedList(getFriendListReplyData.m_vecFriendList,userId);
-            auto sendStr=getFriendListReplyData.generateJson();
-            DoWrite(sendStr,getFriendListReplyData.generateJson().length());
+        GetFriendListReplyData getFriendListReplyData;
+        database::FriendInfoTable friendInfoTable;
+        friendInfoTable.queryUserFrinedList(getFriendListReplyData.m_vecFriendList,userId);
+        auto sendStr=getFriendListReplyData.generateJson();
+        DoWrite(sendStr,getFriendListReplyData.generateJson().length());
     }
     void ChatClient::handleRevcProfileImageMessage(const std::string &message)
     {

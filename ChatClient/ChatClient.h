@@ -10,8 +10,11 @@
 
 #include <boost/asio.hpp>
 
-#include "MysqlQuery.h"
 #include "UserInfoTable.h"
+#include "FriendInfoTable.h"
+#include "ChatMsgCacheTable.h"
+#include "GroupChatInfoTable.h"
+#include "AddFriendCacheTable.h"
 
 #include <mutex>
 #include <memory>
