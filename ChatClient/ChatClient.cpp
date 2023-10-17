@@ -5,6 +5,7 @@
 #include "RegisterJsonData.h"
 #include "RegisterReplyData.h"
 #include "../PublicFunction.hpp"
+#include "StartGroupChatJsonData.h"
 #include "GetFriendListReplyData.h"
 #include "InitialRequestJsonData.h"
 #include "AddFriendNotifyJsonData.h"
@@ -713,5 +714,15 @@ namespace net
     }
     void ChatClient::handleStartGroupChatMessage(const std::string &message, const std::string &imagePath)
     {
+        ptree pt;
+        std::stringstream ss(message);
+        read_json(ss,pt);
+        protocol::StartGroupJsonData startGroupJsonData(message);
+        database::GroupChatInfoTable groupChatInfoTable;
+        std::string Id="";
+        groupChatInfoTable.getCurGroupId(Id);
+        groupChatInfoTable.insertGroupInfo(Id,startGroupJsonData.m_strGroupName,startGroupJsonData.m_strImagePathInServer);
+    
+        //TODO把用户添加到自己id对应的表中，然后通知到每个用户新建了个群
     }
 }
