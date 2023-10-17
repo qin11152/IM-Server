@@ -13,7 +13,6 @@
 #include "AddFriendRequestJsonData.h"
 #include "SingleChatMessageJsonData.h"
 #include "AddFriendResponseJsonData.h"
-#include "StartGroupChatJsonData.h"
 
 #include <fstream>
 #include <boost/uuid/uuid.hpp>
@@ -711,7 +710,6 @@ namespace net
     }
     void ChatClient::initImageMsgCallback()
     {
-        m_mapImageMsgHandleFunc[static_cast<int>(MessageType::InfoWithImage)]=(std::bind(&ChatClient::handleStartGroupChatMessage,this,std::placeholders::_1,std::placeholders::_2));
     }
     void ChatClient::handleStartGroupChatMessage(const std::string &message, const std::string &imagePath)
     {
