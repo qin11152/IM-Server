@@ -144,21 +144,6 @@ namespace net
         {
             if(!ec)
             {
-                //printf("read2\n");
-                if(m_bImageWrite)
-                {
-                    m_stuRecvImageInfo.m_nImageSize -=length;
-                    m_osImageWrite.write(m_oneBuffer,length);
-                    if(0==m_stuRecvImageInfo.m_nImageSize)
-                    {
-                        m_timerForStopReceiveImage.cancel();
-                        m_bImageWrite=false;
-                        m_osImageWrite.close();
-                        handleImageMessage(m_stuRecvImageInfo.m_strJsonMsg,m_stuRecvImageInfo.m_strImageName);
-                    }
-                    DoRead();
-                    return;
-                }
                 //std::string tss(m_cBuffer,m_endPosOfBuffer);
                 //printf("recv:%s\n",m_oneBuffer);
                 //会把从网络传递来的数据从小缓冲区存在一个大缓冲区中，在大缓冲区中进行业务处理
@@ -217,69 +202,6 @@ namespace net
                         //尾部标识也更新一下
                         m_endPosOfBuffer-=(lengthOfMessage+PackageHeadSize);
                         handleClientMessage(test);
-                    }
-                    else if(0x0012==head->cmdId)
-                    {
-                        while(m_endPosOfBuffer<lengthOfMessage+PackageHeadSize)
-                        {
-                            memset(m_oneBuffer,0,FIRSTBUFFERLENGTH);
-                            boost::system::error_code ecs;
-                            int n=read(m_clientSocket,boost::asio::buffer(m_oneBuffer,FIRSTBUFFERLENGTH),ecs);
-                            if(ecs)
-                            {
-                                m_clientSocket.cancel(); 
-                                m_ptrChatServer->removeDisconnetedClient(m_iId,self);
-                                return;
-                            }
-                            memcpy(m_cBuffer+m_endPosOfBuffer,m_oneBuffer,n);
-                        }
-                        //先获取到跟图片信息相关的json字符串
-                        std::string tmpStr(m_cBuffer+PackageHeadSize,lengthOfMessage);
-                        //因已取出一部分信息，要把大缓冲区的内容更新一下
-                        memcpy(m_cBuffer,m_cBuffer+lengthOfMessage+PackageHeadSize,BUFFERLENGTH-lengthOfMessage-PackageHeadSize);
-                        //尾部标识也更新一下
-                        m_endPosOfBuffer-=(lengthOfMessage+PackageHeadSize);
-
-                        m_stuRecvImageInfo.m_strJsonMsg=tmpStr;
-
-                        protocol::image::StartGroupJsonData startGroupChatData(tmpStr);
-                        m_stuRecvImageInfo.m_nImageSize=startGroupChatData.m_iImageLenth;
-
-                        //当前时间转字符串
-                        std::time_t t=std::time(nullptr);
-                        std::tm* now=std::localtime(&t);
-                        std::stringstream ss;
-                        ss<<now->tm_year+1900<<now->tm_mon+1<<now->tm_mday<<now->tm_hour<<now->tm_min<<now->tm_sec;
-                        std::string fileName=ss.str()+"."+startGroupChatData.m_strImageSuffix;
-                        m_stuRecvImageInfo.m_strImageName=fileName;
-                        m_osImageWrite.open(fileName.c_str(),std::ios::binary|std::ios::app);
-#if defined(__linux__)
-                        char buf[m_endPosOfBuffer]{0};
-#elif defined(WIN32)
-                        char* buf=new char[m_endPosOfBuffer];
-#endif
-                        if(m_endPosOfBuffer>0)
-                        {
-                            memcpy(buf,m_cBuffer,m_endPosOfBuffer);
-                            m_osImageWrite.write(buf,m_endPosOfBuffer);
-                            memset(m_cBuffer,0,m_endPosOfBuffer);
-                            m_stuRecvImageInfo.m_nImageSize-=m_endPosOfBuffer;
-                            m_endPosOfBuffer=0;
-                        }
-#if defined(WIN32)
-                        delete buf;
-#endif
-                        
-                        m_bImageWrite=true;
-                        m_timerForStopReceiveImage.expires_after(std::chrono::seconds(5));
-                        m_timerForStopReceiveImage.async_wait([this](const std::error_code& ec){
-                            if(0==ec.value())
-                            {
-                                m_bImageWrite=false;
-                                m_osImageWrite.close();
-                            }
-                            m_timerForStopReceiveImage.cancel();
-                        });
                     }
                 }
                 DoRead();
