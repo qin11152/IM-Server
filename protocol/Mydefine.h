@@ -2,7 +2,7 @@
  * @Author: qin11152 1052080761@qq.com
  * @Date: 2022-06-18 13:57:30
  * @LastEditors: qin11152 1052080761@qq.com
- * @LastEditTime: 2023-04-05 17:00:05
+ * @LastEditTime: 2023-10-17 20:59:15
  * @FilePath: /src/IM-Server/protocol/Mydefine.h
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -38,30 +38,29 @@ enum class ProfileImageType
 
 enum class MessageType
 {
-    Default,
-    InfoWithImage,
-    RegisterRequest,
-    RegisterResponse,
-    LoginRequest,
-    LoginResponse,
-    InitialRequest,
-    StartGroupChat,
-    StartGroupChatReply,
-    GroupChat,
-    SingleChat,
-    AddFriendRequest,
-    AddFriendResponse,
-    AddFriendNotify,
-    HeartPackage,
-    FriendListRequest,
-    FriendListResponse,
-    RefreshFriendListRequest,
-    RefreshFriendListResponse,
-    GetFriendListRequest,
-    GetFriendListReply,
-    ProfileImageMsg,
-    getFriendProfileImage,
-    getFriendProfileImageReply,
+	Default,
+	RegisterRequest,
+	RegisterResponse,
+	LoginRequest,
+	LoginResponse,
+	InitialRequest,
+	StartGroupChat,
+	StartGroupChatReply,
+	GroupChat,
+	SingleChat,
+	AddFriendRequest,
+	AddFriendResponse,
+	AddFriendNotify,
+	HeartPackage,
+	FriendListRequest,
+	FriendListResponse,
+	RefreshFriendListRequest,
+	RefreshFriendListResponse,
+	GetFriendListRequest,
+	GetFriendListReply,
+	ProfileImageMsg,
+	getFriendProfileImage,
+	getFriendProfileImageReply,
 };
 
 using MessageTypeBaseType=std::underlying_type<MessageType>;
