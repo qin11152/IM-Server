@@ -2,7 +2,7 @@
  * @Author: qin11152 1052080761@qq.com
  * @Date: 2023-10-14 16:37:09
  * @LastEditors: qin11152 1052080761@qq.com
- * @LastEditTime: 2023-10-14 16:44:24
+ * @LastEditTime: 2023-10-17 21:27:55
  * @FilePath: /IM-Server/MysqlQuery/GroupChatRecordTable.h
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -12,13 +12,13 @@
 
 namespace database
 {
-    class GroupChatUserInfoTable
+    class GroupChatRecordTable
     {
     public:
-        GroupChatUserInfoTable(std::string strGroupChatId);
-        ~GroupChatUserInfoTable()=delete;
-        const GroupChatUserInfoTable& operator=(const GroupChatUserInfoTable& other)=delete;
-        GroupChatUserInfoTable(const GroupChatUserInfoTable& other)=delete;
+        GroupChatRecordTable(std::string strGroupChatId);
+        ~GroupChatRecordTable()=default;
+        const GroupChatRecordTable& operator=(const GroupChatRecordTable& other)=delete;
+        GroupChatRecordTable(const GroupChatRecordTable& other)=delete;
 
         /**
          * @brief 创建表
@@ -32,5 +32,5 @@ namespace database
 
     private:
         std::string m_strGroupChatId{""};
-    }
+    };
 }
