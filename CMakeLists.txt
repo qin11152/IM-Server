@@ -4,9 +4,10 @@ project(qin)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../)
 
+add_subdirectory(${CMAKE_SOURCE_DIR}/HttpServer)
+
 #cmake中指定生成64位程序
 set(CMAKE_GENERATOR_PLATFORM x64)
-set(CMAKE_BUILD_TYPE "Release")
 
 aux_source_directory(. DIR_SRCS)
 aux_source_directory(./protocol DIR_SRCS)
