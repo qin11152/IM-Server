@@ -7,13 +7,13 @@ namespace database
     {
         MYSQL_RES* result=nullptr;
         std::string query="insert into friend_info values(\""+ friendId_1 +"\",\""+ friendId_2 +"\",\""+friend2name+"\")";
-        if(DataBaseOperate::Instance()->execQuery(query.c_str(),result))
+        if(!DataBaseOperate::Instance()->execQuery(query.c_str(),&result))
         {
             _LOG(Logcxx::Level::ERRORS,"insert into friend_info failed,query is:%s",query.c_str());
             return false;
         }
         query="insert into friend_info values(\""+ friendId_2 +"\",\""+ friendId_1 +"\",\""+friend1name+"\")";
-        if(DataBaseOperate::Instance()->execQuery(query.c_str(),result))
+        if(!DataBaseOperate::Instance()->execQuery(query.c_str(),&result))
         {
             _LOG(Logcxx::Level::ERRORS,"insert into friend_info failed,query is:%s",query.c_str());
             return false;
@@ -24,7 +24,7 @@ namespace database
     {
         MYSQL_RES* result=nullptr;
         std::string query="SELECT a.id_friend, a.name, b.imagetimestamp from friend_info as a inner JOIN user_info as b on (a.id_friend=b.id and a.id_my=\""+strUserId+"\") order by CONVERT( a.`name` USING gbk) COLLATE gbk_chinese_ci DESC;";
-        if(DataBaseOperate::Instance()->execQuery(query.c_str(),result))
+        if(!DataBaseOperate::Instance()->execQuery(query.c_str(),&result))
         {
             _LOG(Logcxx::Level::ERRORS,"select id_friend, name from friend_info failed,query is:%s",query.c_str());
             return false;

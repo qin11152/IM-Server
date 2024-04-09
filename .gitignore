@@ -10,3 +10,6 @@
 /.testlog4cxx.log
 /qin
 /.httpserver
+core
+httpserver
+httpserver

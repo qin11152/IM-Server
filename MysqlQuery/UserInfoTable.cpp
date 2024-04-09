@@ -20,7 +20,7 @@ namespace database
         +std::to_string(returnId)+",\""+password+"\",\""+name+"\",\""+signature+
         "\",\""+iconUrl+"\",false,\""+profileImagePath+"\",\""+time+"\");";
         MYSQL_RES* result=nullptr;
-        if(DataBaseOperate::Instance()->execQuery(query.c_str(),result))
+        if(!DataBaseOperate::Instance()->execQuery(query.c_str(),&result))
         {
             _LOG(Logcxx::Level::ERRORS,"insert into user_info failed,query is:%s",query.c_str());
             return false;
@@ -33,7 +33,7 @@ namespace database
     {
         MYSQL_RES* result=nullptr;
         std::string query="select * from user_info";
-        if(DataBaseOperate::Instance()->execQuery(query.c_str(),result))
+        if(!DataBaseOperate::Instance()->execQuery(query.c_str(),&result))
         {
             _LOG(Logcxx::Level::ERRORS,"select * from user_info failed");
             return false;
@@ -55,7 +55,7 @@ namespace database
     {
         MYSQL_RES* result=nullptr;
         std::string query="select count(*) from user_info";
-        if(DataBaseOperate::Instance()->execQuery(query.c_str(),result))
+        if(!DataBaseOperate::Instance()->execQuery(query.c_str(),&result))
         {
             _LOG(Logcxx::Level::ERRORS,"select count(*) from user_info failed");
             return false;
@@ -71,7 +71,7 @@ namespace database
         MYSQL_RES* result=nullptr;
         bool onlineState={false};
         std::string query="select online from user_info where id="+userId;
-        if(DataBaseOperate::Instance()->execQuery(query.c_str(),result))
+        if(!DataBaseOperate::Instance()->execQuery(query.c_str(),&result))
         {
             _LOG(Logcxx::Level::ERRORS,"insert into friend_info failed,query is:%s",query.c_str());
             return false;
@@ -102,7 +102,7 @@ namespace database
         MYSQL_RES* result=nullptr;
         std::string strOnlineState=onlineState?"1":"0";
         std::string query="update user_info set online="+strOnlineState+" where id="+userId;
-        if(DataBaseOperate::Instance()->execQuery(query.c_str(),result))
+        if(!DataBaseOperate::Instance()->execQuery(query.c_str(),&result))
         {
             _LOG(Logcxx::Level::ERRORS,"update user_info set online failed,query is:%s",query.c_str());
             return false;
@@ -115,7 +115,7 @@ namespace database
         MYSQL_RES* result=nullptr;
         bool isExist=false;
         std::string query="select count(*) from user_info where id="+userId;
-        if(DataBaseOperate::Instance()->execQuery(query.c_str(),result))
+        if(!DataBaseOperate::Instance()->execQuery(query.c_str(),&result))
         {
             _LOG(Logcxx::Level::ERRORS,"select count(*) from user_info failed,query is:%s",query.c_str());
             return false;
@@ -141,7 +141,7 @@ namespace database
     {
         MYSQL_RES* result=nullptr;
         std::string query="select name from user_info where id="+id;
-        if(DataBaseOperate::Instance()->execQuery(query.c_str(),result))
+        if(!DataBaseOperate::Instance()->execQuery(query.c_str(),&result))
         {
             _LOG(Logcxx::Level::ERRORS,"select name from user_info failed,query is:%s",query.c_str());
             return "";
@@ -168,7 +168,7 @@ namespace database
     {
         MYSQL_RES* result=nullptr;
         std::string query="update user_info set image=\'"+strIamgePath+"\', imagetimestamp=\'"+timeStamp+"\' where id="+id; 
-        if(DataBaseOperate::Instance()->execQuery(query.c_str(),result))
+        if(!DataBaseOperate::Instance()->execQuery(query.c_str(),&result))
         {
             _LOG(Logcxx::Level::ERRORS,"update user image failed,query is:%s",query.c_str());
             return false;
@@ -180,7 +180,7 @@ namespace database
     {
         MYSQL_RES* result=nullptr;
         std::string query="select image from user_info where id="+id;
-        if(DataBaseOperate::Instance()->execQuery(query.c_str(),result))
+        if(!DataBaseOperate::Instance()->execQuery(query.c_str(),&result))
         {
             _LOG(Logcxx::Level::ERRORS,"select image from user_info failed,query is:%s",query.c_str());
             return false;
@@ -210,7 +210,7 @@ namespace database
     {
         MYSQL_RES* result=nullptr;
         std::string query="select imagetimestamp from user_info where id="+id;
-        if(DataBaseOperate::Instance()->execQuery(query.c_str(),result))
+        if(!DataBaseOperate::Instance()->execQuery(query.c_str(),&result))
         {
             _LOG(Logcxx::Level::ERRORS,"select imagetimestamp from user_info failed,query is:%s",query.c_str());
             return false;

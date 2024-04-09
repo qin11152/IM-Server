@@ -2,7 +2,7 @@
  * @Author: qin11152 1052080761@qq.com
  * @Date: 2023-10-12 20:08:26
  * @LastEditors: qin11152 1052080761@qq.com
- * @LastEditTime: 2023-10-14 15:16:41
+ * @LastEditTime: 2024-04-09 11:08:15
  * @FilePath: /IM-Server/MysqlQuery/GroupChatInfoTable.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -14,7 +14,7 @@ namespace database
     bool GroupChatInfoTable::createTable()
     {
         std::string query="CREATE TABLE group_properities11 (groupId int NOT NULL,selfDefineName varchar(255),iconPath varchar(255),PRIMARY KEY (groupId))";
-        if(DataBaseOperate::Instance()->execQuery(query.c_str(),nullptr))
+        if(!DataBaseOperate::Instance()->execQuery(query.c_str(),nullptr))
         {
             _LOG(Logcxx::Level::ERRORS,"create table group_properities failed,query is:%s",query.c_str());
             return false;
@@ -26,7 +26,7 @@ namespace database
     {
         MYSQL_RES* result=nullptr;
         std::string query="select count(*) from group_properities";
-        if(DataBaseOperate::Instance()->execQuery(query.c_str(),result))
+        if(!DataBaseOperate::Instance()->execQuery(query.c_str(),&result))
         {
             _LOG(Logcxx::Level::ERRORS,"select max(id) from group_properities failed,query is:%s",query.c_str());
             return false;

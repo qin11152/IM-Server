@@ -9,7 +9,7 @@ bool database::AddFriendCacheTable::createTable()
 bool database::AddFriendCacheTable::insertAddFriendCache(const std::string &requestId, const std::string &destinationId, const std::string &verifyMsg)
 {
     std::string query="insert into add_friend values(\""+requestId+"\",\""+destinationId+"\",\""+verifyMsg+"\")";
-    if(DataBaseOperate::Instance()->execQuery(query.c_str(),nullptr))
+    if(!DataBaseOperate::Instance()->execQuery(query.c_str(),nullptr))
     {
         _LOG(Logcxx::Level::ERRORS,"insert into add_friend failed,query is:%s",query.c_str());
         return false;
@@ -21,7 +21,7 @@ bool database::AddFriendCacheTable::queryCachedAddFriendInfo(std::vector<MyAddFr
 {
     MYSQL_RES* result=nullptr;
     std::string query="select * from add_friend where myId=\""+id+"\"";
-    if(DataBaseOperate::Instance()->execQuery(query.c_str(),result))
+    if(!DataBaseOperate::Instance()->execQuery(query.c_str(),&result))
     {
         _LOG(Logcxx::Level::ERRORS,"select * from add_friend failed,query is:%s",query.c_str());
         return false;

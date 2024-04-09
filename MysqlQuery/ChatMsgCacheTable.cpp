@@ -12,7 +12,7 @@ namespace database
     {
         MYSQL_RES* result=nullptr;
         std::string query="select * from chat_message_cache where toid=\""+id+"\"";
-        if(DataBaseOperate::Instance()->execQuery(query.c_str(),result))
+        if(!DataBaseOperate::Instance()->execQuery(query.c_str(),&result))
         {
             _LOG(Logcxx::Level::ERRORS,"select * from chat_message_cache failed,query is:%s",query.c_str());
             return false;
@@ -46,7 +46,7 @@ namespace database
     bool ChatMsgCacheTable::insertCachedChatMsg(std::string &fromId, std::string &toId, std::string &msg, std::string &sendName, std::string &time)
     {
         std::string query="insert into chat_message_cache values(\""+fromId+"\",\""+toId+"\",\""+msg+"\",\""+sendName+"\",\""+time+"\")";
-        if(DataBaseOperate::Instance()->execQuery(query.c_str(),nullptr))
+        if(!DataBaseOperate::Instance()->execQuery(query.c_str(),nullptr))
         {
             _LOG(Logcxx::Level::ERRORS,"insert into chat_message_cache failed,query is:%s",query.c_str());
             return false;
@@ -56,7 +56,7 @@ namespace database
     bool ChatMsgCacheTable::deleteCachedChatMsg(std::string &id)
     {
         std::string query="delete from chat_message_cache where toId=\""+id+"\"";
-        if(DataBaseOperate::Instance()->execQuery(query.c_str(),nullptr))
+        if(!DataBaseOperate::Instance()->execQuery(query.c_str(),nullptr))
         {
             _LOG(Logcxx::Level::ERRORS,"delete from chat_message_cache failed,query is:%s",query.c_str());
             return false;
