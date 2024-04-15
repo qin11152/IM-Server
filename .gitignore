@@ -9,7 +9,6 @@
 /.vscode
 /.testlog4cxx.log
 /qin
-/.httpserver
+httpserver
 core
-httpserver
-httpserver
+/uploadfile

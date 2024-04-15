@@ -10,7 +10,14 @@ using Poco::Net::HTTPRequestHandlerFactory;
 using Poco::Util::ServerApplication;
 using Poco::Util::Application;
 
-class MyServerApplication: public ServerApplication {
+class MyRequestHandlerFactory : public Poco::Net::HTTPRequestHandlerFactory
+{
+public:
+	virtual Poco::Net::HTTPRequestHandler *createRequestHandler(const Poco::Net::HTTPServerRequest &);
+};
+
+class MyServerApplication: public ServerApplication 
+{
 protected:
     int main(const std::vector<std::string>&);
 };
