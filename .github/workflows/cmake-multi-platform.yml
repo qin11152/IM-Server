@@ -45,6 +45,16 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Install Poco
+      run: |
+        git clone https://github.com/pocoproject/poco.git
+        cd poco
+        mkdir cmake-build
+        cd cmake-build
+        cmake ..
+        cmake --build . --config Release
+        sudo cmake --build . --target install
+
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
       id: strings
